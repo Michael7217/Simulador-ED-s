@@ -2,10 +2,13 @@ import React from "react";
 import menuicon from '../assets/MenuIcon.png'
 import Logo from '../assets/Logo.png'
 
-export default function Header(){
+
+
+export default function Header(props){
+    
     return(
-        <header className="w-full h-20 bg-azul flex items-center px-4">
-            <div className="h-5 w-8" >
+        <header className="relative z-10 w-full h-18 bg-azul flex items-center px-4 rounded-b-xl">
+            <div className="h-5 w-8" onClick={()=>{props.funcao()}} >
                 <img src={menuicon} alt="menu" className="cursor-pointer"/>
             </div>
             <div className="h-auto w-full flex items-center  justify-center gap-2">
