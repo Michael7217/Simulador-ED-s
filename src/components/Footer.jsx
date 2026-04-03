@@ -9,9 +9,9 @@ export default function Footer(){
                 <p>Matheus de Assis</p>
                 <p>Gabriel Gilvan</p>
             </div>
-            <div className='text-sm gap-0'>
+            <div className='text-sm px-5'>
                 <img src={Logo} alt='logo' className='h-auto'></img>
-                <p className='border-2'>Simulador ED`s</p>
+                <p>Simulador ED`s</p>
             </div>
         </footer>
     )

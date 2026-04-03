@@ -7,7 +7,7 @@ export default function Home(){
     return(
         <>
         <Titulo/>
-        <main className='flex flex-col h-125 flex-wrap items-center gap-7 w-full mx-auto'>
+        <main className='flex flex-col h-125 flex-wrap items-center gap-7 w-full mx-auto '>
             <Quadro></Quadro>
             <Quadro></Quadro>
             <Quadro></Quadro>
