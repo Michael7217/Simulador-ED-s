@@ -30,28 +30,28 @@ export default function Sidebar(props) {
                 </div>
 
                 <div className="flex items-center gap-4 text-xl cursor-pointer pb-2 border-b-2 border-b-ciano">
-                    <Link to='/lista-encadeada' className="flex gap-3" onClick={()=>{props.funcao(!props.estado)}}>
+                    <Link to='/simulacao/lista-encadeada' className="flex gap-3" onClick={()=>{props.funcao(!props.estado)}}>
                         <img src={EstIcon} className="w-8 h-8"/>
                         <h2>Lista Encadeada</h2>
                     </Link>
                 </div>
 
                 <div className="gap-4 text-xl cursor-pointer pb-2 border-b-2 border-b-ciano">
-                    <Link to='/fila' className="flex gap-3" onClick={()=>{props.funcao(!props.estado)}}>
+                    <Link to='/simulacao/fila' className="flex gap-3" onClick={()=>{props.funcao(!props.estado)}}>
                         <img src={EstIcon} className="w-8 h-8"/>
                         <h2>Fila</h2>
                     </Link>
                 </div>
 
                 <div className="gap-4 text-xl cursor-pointer pb-2 border-b-2 border-b-ciano">
-                    <Link to='/pilha' className="flex gap-3" onClick={()=>{props.funcao(!props.estado)}}>
+                    <Link to='/simulacao/pilha' className="flex gap-3" onClick={()=>{props.funcao(!props.estado)}}>
                         <img src={EstIcon} className="w-8 h-8"/>
                         <h2>Pilha</h2>  
                     </Link>
                 </div>
 
                 <div className="gap-4 text-xl cursor-pointerpb-2 border-b-2 border-b-ciano">
-                    <Link to='/arvore-binaria' className="flex gap-3" onClick={()=>{props.funcao(!props.estado)}}>
+                    <Link to='/simulacao/arvore-binaria' className="flex gap-3" onClick={()=>{props.funcao(!props.estado)}}>
                         <img src={EstIcon} className="w-8 h-8 mb-2"/>
                         <h2>Árvore Binária</h2> 
                     </Link>   

@@ -8,9 +8,9 @@ export default function Header(props){
     const pagina = useLocation();
     const navigate = useNavigate();
     const isHome = pagina.pathname === '/';
-    const isSimulacao = pagina.pathname.startsWith('/simulacao/');
+    const isSimulacao = pagina.pathname.startsWith('/conceito/');
     const pathAtual = pagina.pathname.split('/').pop();
-    const targetPath = isSimulacao ? `/${pathAtual}` : `/simulacao/${pathAtual}`;
+    const targetPath = isSimulacao ? `/simulacao/${pathAtual}` : `/conceito/${pathAtual}`;
     const buttonText = isSimulacao ? 'Simulação' : 'Conceito';
 
     return(

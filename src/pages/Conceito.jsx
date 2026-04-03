@@ -71,7 +71,7 @@ export default function PaginaEstrutura(){
 
     return(
         <div className="w-full min-h-screen p-6 md:p-5 font-sans text-azul">
-            <div className="flex items-center gap-2 mb-8">
+            <div className="flex items-center gap-2 mb-4">
                 <div className='flex gap-3 py-3 px-2 md:gap-4 md:px-4 md:py-1'>
                     <img src={OptionIcon} className='w-6 h-6 md:w-8 md:h-8' alt="opção"></img>
                 </div>
