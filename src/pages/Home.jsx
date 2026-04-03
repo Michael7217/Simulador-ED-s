@@ -6,7 +6,7 @@ export default function Home(){
     
     return(
         <>
-        <Titulo/>
+        <Titulo nome='Tipos de estruturas'/>
         <main className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 p-4 md:p-6 lg:p-8 w-full mx-auto max-w-6xl'>
             <Quadro index={0}></Quadro>
             <Quadro index={1}></Quadro>
