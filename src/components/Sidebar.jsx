@@ -15,7 +15,7 @@ export default function Sidebar(props) {
             </a>
 
             <div className="flex flex-col items-center justify-center w-full text-nowrap mt-10">
-                <img src={Logo} alt='logo' className="" />
+                <img src={Logo} alt='logo'/>
                 <h1 className="mt-2 text-sm text-branco">ED`s simulador de estruturas de dados</h1>
             </div>
 
@@ -23,42 +23,42 @@ export default function Sidebar(props) {
 
                 <div className="gap-4 text-xl cursor-pointer pb-2 border-b-2 border-b-ciano"> 
                     
-                    <Link to='/' className="flex gap-4">
+                    <Link to='/' className="flex gap-4" onClick={()=>{props.funcao(!props.estado)}}>
                         <img src={HomeIcon} className="w-7 h-6 pl-1"/>
                         <h2>Home</h2>
                     </Link>
                 </div>
 
                 <div className="flex items-center gap-4 text-xl cursor-pointer pb-2 border-b-2 border-b-ciano">
-                    <Link to='/lista-encadeada' className="flex gap-3">
+                    <Link to='/lista-encadeada' className="flex gap-3" onClick={()=>{props.funcao(!props.estado)}}>
                         <img src={EstIcon} className="w-8 h-8"/>
                         <h2>Lista Encadeada</h2>
                     </Link>
                 </div>
 
                 <div className="gap-4 text-xl cursor-pointer pb-2 border-b-2 border-b-ciano">
-                    <Link to='/fila' className="flex gap-3">
+                    <Link to='/fila' className="flex gap-3" onClick={()=>{props.funcao(!props.estado)}}>
                         <img src={EstIcon} className="w-8 h-8"/>
                         <h2>Fila</h2>
                     </Link>
                 </div>
 
                 <div className="gap-4 text-xl cursor-pointer pb-2 border-b-2 border-b-ciano">
-                    <Link to='/pilha' className="flex gap-3">
+                    <Link to='/pilha' className="flex gap-3" onClick={()=>{props.funcao(!props.estado)}}>
                         <img src={EstIcon} className="w-8 h-8"/>
                         <h2>Pilha</h2>  
                     </Link>
                 </div>
 
                 <div className="gap-4 text-xl cursor-pointerpb-2 border-b-2 border-b-ciano">
-                    <Link to='/arvore-binaria' className="flex gap-3">
+                    <Link to='/arvore-binaria' className="flex gap-3" onClick={()=>{props.funcao(!props.estado)}}>
                         <img src={EstIcon} className="w-8 h-8 mb-2"/>
                         <h2>Árvore Binária</h2> 
                     </Link>   
                 </div>
 
                 <div className="gap-4 text-xl cursor-pointer pb-2 border-b-2 border-b-ciano">
-                    <Link to='/sobre' className="flex gap-3">
+                    <Link to='/sobre' className="flex gap-3" onClick={()=>{props.funcao(!props.estado)}}>
                         <img src={EstIcon} className="w-8 h-8"/>
                         <h2>Sobre</h2>  
                     </Link>

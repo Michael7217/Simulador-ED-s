@@ -7,12 +7,11 @@ import { useLocation, useNavigate } from 'react-router-dom'
 export default function Header(props){
     const pagina = useLocation();
     const navigate = useNavigate();
+    const isHome = pagina.pathname === '/';
+    const isSimulacao = pagina.pathname.startsWith('/simulacao/');
     const pathAtual = pagina.pathname.split('/').pop();
-
-    let botao=false;
-    if(pagina.pathname !== '/'){
-        botao = true
-    }
+    const targetPath = isSimulacao ? `/${pathAtual}` : `/simulacao/${pathAtual}`;
+    const buttonText = isSimulacao ? 'Simulação' : 'Conceito';
 
     return(
         <header className="relative z-10 w-full h-18 bg-azul flex items-center px-4 rounded-b-xl justify-between">
@@ -24,8 +23,8 @@ export default function Header(props){
                 <h1 className="font-bold text-branco">Simulador ED`s</h1>
             </div>
             <div className="w-24 md:w-32 flex justify-end">
-                {botao && (
-                    <a onClick={() => navigate(`/simulacao/${pathAtual}`)} className="text-amarelo font-bold text-sm md:text-lg hover:!text-laranja transition-all duration-300 cursor-pointer">Simulação</a>
+                {!isHome && (
+                    <a onClick={() => navigate(targetPath)} className="text-amarelo font-bold text-sm md:text-lg hover:!text-laranja transition-all duration-300 cursor-pointer">{buttonText}</a>
                 )}
                 </div>
 
