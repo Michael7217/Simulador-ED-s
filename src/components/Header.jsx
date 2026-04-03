@@ -11,7 +11,7 @@ export default function Header(props){
             <div className="h-5 w-8" onClick={()=>{props.funcao()}} >
                 <img src={menuicon} alt="menu" className="cursor-pointer"/>
             </div>
-            <div className="h-auto w-full flex items-center  justify-center gap-2">
+            <div className="h-auto w-full flex items-center justify-center gap-2 text-2xl">
                 <img src={Logo} alt="logo" />
                 <h1>Simulador ED`s</h1>
             </div>

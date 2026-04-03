@@ -1,14 +1,26 @@
 @import 'tailwindcss';
 
-/* paleta de cores */
-@theme {
-  --color-azul: #023047; 
-  --color-amarelo: #FFB703;
-  --color-ciano: #8ECAE6;
-  --color-laranja: #FB8500;
-  --color-branco: #FFFFFF;
-  --color-preto: rgba(0, 0, 0, 0.5);
-}
+/* Classes customizadas para as cores */
+.bg-azul { background-color: var(--color-azul); }
+.bg-amarelo { background-color: var(--color-amarelo); }
+.bg-ciano { background-color: var(--color-ciano); }
+.bg-laranja { background-color: var(--color-laranja); }
+.bg-branco { background-color: var(--color-branco); }
+.bg-preto { background-color: var(--color-preto); }
+
+.text-azul { color: var(--color-azul); }
+.text-amarelo { color: var(--color-amarelo); }
+.text-ciano { color: var(--color-ciano); }
+.text-laranja { color: var(--color-laranja); }
+.text-branco { color: var(--color-branco); }
+.text-preto { color: var(--color-preto); }
+
+.border-azul { border-color: var(--color-azul); }
+.border-amarelo { border-color: var(--color-amarelo); }
+.border-ciano { border-color: var(--color-ciano); }
+.border-laranja { border-color: var(--color-laranja); }
+.border-branco { border-color: var(--color-branco); }
+.border-preto { border-color: var(--color-preto); }
 
 html {
   margin: 0;
