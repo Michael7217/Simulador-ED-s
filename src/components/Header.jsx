@@ -13,7 +13,7 @@ export default function Header(props){
             </div>
             <div className="h-auto w-full flex items-center justify-center gap-2 text-2xl">
                 <img src={Logo} alt="logo" />
-                <h1>Simulador ED`s</h1>
+                <h1 className="font-bold">Simulador ED`s</h1>
             </div>
 
         </header>

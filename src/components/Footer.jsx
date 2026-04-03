@@ -10,8 +10,8 @@ export default function Footer(){
                 <p>Gabriel Gilvan</p>
             </div>
             <div className='text-sm px-5'>
-                <img src={Logo} alt='logo' className='h-auto'></img>
-                <p>Simulador ED`s</p>
+                <img src={Logo} alt='logo'></img>
+                <p className=''>Simulador ED`s</p>
             </div>
         </footer>
     )

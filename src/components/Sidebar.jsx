@@ -7,7 +7,7 @@ import {Link} from 'react-router-dom'
 
 export default function Sidebar(props){
     return(
-        <aside className={`${props.estado ? "translate-x-0" : "-translate-x-full"} fixed inset-y-0 left-0 z-50 bg-azul w-72 flex-col items-center border-2 border-ciano rounded-xl px-8 pt-8 transition-transform duration-300`}>
+        <aside className={`${props.estado ? "translate-x-0" : "-translate-x-full"} fixed inset-y-0 left-0 z-50 bg-azul w-72 flex-col items-center border-2 border-amarelo rounded-xl px-8 pt-8 transition-transform duration-300`}>
 
             <a onClick={()=>{props.funcao()}} className="absolute top-4 left-4 flex items-center gap-2 cursor-pointer"><img src={SairIcon}/>voltar</a>
 
