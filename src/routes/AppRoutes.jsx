@@ -3,6 +3,8 @@ import Home from '../pages/Home'
 import Layout from '../layout/Layout'
 import Simulacao from '../pages/Simulacao'
 import Conteudo from '../pages/Conceito'
+import Sobre from '../pages/Sobre'
+
 export default function AppRoutes(){
     return(
         <Routes>
@@ -10,6 +12,7 @@ export default function AppRoutes(){
                 <Route index element={<Home/>}/>
                 <Route path='/simulacao/:estrutura' element={<Simulacao/>}/>
                 <Route path='/conceito/:estrutura' element={<Conteudo/>}/>
+                <Route path='/sobre' element={<Sobre/>}/>
             </Route>
         </Routes>
     )

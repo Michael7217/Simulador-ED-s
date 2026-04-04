@@ -7,7 +7,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 export default function Header(props){
     const pagina = useLocation();
     const navigate = useNavigate();
-    const isHome = pagina.pathname === '/';
+    const isHome = pagina.pathname === '/' || pagina.pathname === '/sobre';
     const isSimulacao = pagina.pathname.startsWith('/conceito/');
     const pathAtual = pagina.pathname.split('/').pop();
     const targetPath = isSimulacao ? `/simulacao/${pathAtual}` : `/conceito/${pathAtual}`;
