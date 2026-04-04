@@ -1,6 +1,7 @@
 import React from "react";
 import { useParams } from 'react-router-dom';
 import OptionIcon from '../assets/OptionIcon.png';
+import Titulo from '../components/Titulo';
 
 const estruturas = [
     {
@@ -65,21 +66,15 @@ const estruturas = [
     }
 ];
 
-export default function PaginaEstrutura(){
+export default function Conceito(){
     const { estrutura } = useParams();
     const estruturaAtual = estruturas.find(item => item.slug === estrutura) || estruturas[0];
 
     return(
-        <div className="w-full min-h-screen p-6 md:p-5 font-sans text-azul">
-            <div className="flex items-center gap-2 mb-4">
-                <div className='flex gap-3 py-3 px-2 md:gap-4 md:px-4 md:py-1'>
-                    <img src={OptionIcon} className='w-6 h-6 md:w-8 md:h-8' alt="opção"></img>
-                </div>
-                <h2 className="text-xl md:text-3xl font-bold text-amarelo drop-shadow-md [-webkit-text-stroke:1px_black]">
-                    {estruturaAtual.titulo}
-                </h2>
+        <div className="w-full min-h-screen p-1 font-sans text-azul">
+            <div className="flex items-center gap-2 mb-2">
+                <Titulo nome={estruturaAtual.titulo}></Titulo>
             </div>
-
             <div className="font-medium text-base md:text-lg leading-relaxed flex flex-col gap-4">
                 {estruturaAtual.conteudo}
             </div>

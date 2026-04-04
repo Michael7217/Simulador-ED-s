@@ -10,7 +10,7 @@ export default function Sidebar(props) {
         <>
             {props.estado && (
                 <div 
-                    className="fixed inset-0 bg-preto z-40 transition-opacity"onClick={() => props.funcao()} 
+                    className="fixed inset-0 bg-preto z-40 transition-opacity" onClick={() => props.funcao()} 
                 ></div>
             )}
 
