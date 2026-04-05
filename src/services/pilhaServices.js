@@ -1,4 +1,3 @@
-import { Axios } from "axios";
 import Api from "./api";
 
 export const inserirPilha = (valor) => {
