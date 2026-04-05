@@ -1,7 +1,7 @@
 import api from "./api";
 
-export const adicionarLista = (dados) => {
-    return api.post('/api/lista/add', dados);
+export const adicionarLista = (valor, pos) => {
+    return api.post(`/api/lista/add?valor=${valor}&pos=${pos}`);
 }
 
 export const adicionarListaOrdenado = (valor) => {

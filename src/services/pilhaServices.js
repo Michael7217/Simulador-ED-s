@@ -5,7 +5,7 @@ export const inserirPilha = (valor) => {
 }
 
 export const removerPilha = () => {
-    return Api.delete('/api/pilha/removedor'); 
+    return Api.delete('/api/pilha/remover'); 
 }
 
 export const visualizarPilha = () => {
