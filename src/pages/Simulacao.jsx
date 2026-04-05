@@ -20,7 +20,9 @@ export default function Simulacao(){
             <h2 className='pl-[7%]  md:pl-[15%]'>Operações</h2>
         </div>
         <div className='flex justify-around h-4/5 mx-6'>
-            <div className='border-4 border-azul rounded-2xl h-screen w-2/3'>Quadro</div>
+            <div className='border-4 border-azul rounded-2xl h-screen w-2/3'>
+                quadro
+            </div>
             <div className='border-4 border-azul rounded-2xl  w-2/10 h-60 flex flex-col '>
                 <Button acao={acoes[0]}>
                     <p>{acoes[0]}</p>
