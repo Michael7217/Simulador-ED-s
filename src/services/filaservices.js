@@ -1,13 +1,13 @@
-import api from "./api";
+import Api from "./api";
 
 export const adicionarFila = (valor) => {
-    return api.post(`/api/fila/adicionar/${valor}`);
+    return Api.post(`/api/fila/adicionar/${valor}`);
 }
 
 export const removerFila = () => {
-    return api.delete('/api/fila/remover');
+    return Api.delete('/api/fila/remover');
 }
 
 export const visualizarFila = () => {
-    return api.get('/api/fila');
+    return Api.get('/api/fila');
 }
