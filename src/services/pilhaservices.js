@@ -1,13 +1,13 @@
-import { Axios } from "axios";
-import Api from "./api";
+import api from "./api";
 
 export const inserirPilha = (valor) => {
-    return Api.post((`/api/pilha/inserir/${valor}`));
+    return api.post(`/api/pilha/inserir/${valor}`);
 }
+
 export const removerPilha = () => {
-    return Api.delete(('/api/pilha/remover'));
+    return api.delete('/api/pilha/removedor'); 
 }
 
 export const visualizarPilha = () => {
-    return Api.get(('/api/pilha'));
+    return api.get('/api/pilha');
 }
