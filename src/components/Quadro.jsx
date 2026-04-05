@@ -8,7 +8,7 @@ const estruturas = [
     { nome: 'Árvore Binária', path: '/arvore-binaria' },
     { nome: 'Pilha', path: '/pilha' },
     { nome: 'Árvore AVL', path: '/arvore-avl' },
-    { nome: 'Árvore', path: '/arvore' }
+    { nome: 'Árvore binária de busca', path: '/arvore' }
 ]
 
 export default function Quadro({index}){

@@ -1,16 +1,16 @@
 import React from "react";
 import menuicon from '../assets/MenuIcon.png'
 import Logo from '../assets/Logo.png'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 
 
 export default function Header(props){
     const pagina = useLocation();
     const navigate = useNavigate();
+    const { estrutura } = useParams();
     const isHome = pagina.pathname === '/' || pagina.pathname === '/sobre';
     const isSimulacao = pagina.pathname.startsWith('/conceito/');
-    const pathAtual = pagina.pathname.split('/').pop();
-    const targetPath = isSimulacao ? `/simulacao/${pathAtual}` : `/conceito/${pathAtual}`;
+    const targetPath = isSimulacao ? `/simulacao/${estrutura}` : `/conceito/${estrutura}`;
     const buttonText = isSimulacao ? 'Simulação' : 'Conceito';
 
     return(
@@ -24,7 +24,7 @@ export default function Header(props){
             </div>
             <div className="w-24 md:w-32 flex justify-end">
                 {!isHome && (
-                    <a onClick={() => navigate(targetPath)} className="text-amarelo font-bold text-sm md:text-lg hover:!text-laranja transition-all duration-300 cursor-pointer">{buttonText}</a>
+                    <a onClick={() => navigate(targetPath)} className="text-amarelo font-bold text-sm md:text-lg hover:text-laranja! transition-all duration-300 cursor-pointer">{buttonText}</a>
                 )}
                 </div>
 

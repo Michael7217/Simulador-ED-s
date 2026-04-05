@@ -56,7 +56,7 @@ const estruturas = [
     },
     {
         slug: 'arvore',
-        titulo: "Árvore",
+        titulo: "Árvore binária de busca",
         conteudo: (
             <>
             <h1>O que é Árvore?</h1>
@@ -73,7 +73,7 @@ export default function Conceito(){
     return(
         <div className="w-full min-h-screen p-1 font-sans text-azul">
             <div className="flex items-center gap-2 mb-2">
-                <Titulo nome={estruturaAtual.titulo}></Titulo>
+                <Titulo nome={(estruturaAtual.titulo).toLowerCase()}></Titulo>
             </div>
             <div className="font-medium text-base md:text-lg leading-relaxed flex flex-col gap-4">
                 {estruturaAtual.conteudo}

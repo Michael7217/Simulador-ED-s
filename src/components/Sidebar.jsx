@@ -14,7 +14,7 @@ export default function Sidebar(props) {
                 ></div>
             )}
 
-            <aside className={`${props.estado ? "translate-x-0" : "-translate-x-full"} fixed inset-y-0 left-0 z-50 bg-azul w-72 flex-col items-center border-2 border-amarelo rounded-xl px-8 pt-8 transition-transform duration-300`}>
+            <aside className={`${props.estado ? "translate-x-0" : "-translate-x-full"} absolute inset-y-0 left-0 z-50 bg-azul w-72 h-screen overflow-y-auto flex flex-col items-center border-2 border-amarelo rounded-xl px-8 pt-8 transition-transform duration-300`}>
 
                 <a onClick={() => { props.funcao() }} className="absolute top-4 left-4 flex items-center gap-2 cursor-pointer text-amarelo hover:brightness-110 transition-all text-lg font-medium">
                     <img src={SairIcon} alt="Ícone voltar" />
@@ -73,7 +73,7 @@ export default function Sidebar(props) {
                     <div className="border-b-2 border-ciano py-3">
                         <Link to='/simulacao/arvore' className="flex items-center gap-3 text-lg text-amarelo hover:!text-branco transition-colors" onClick={() => props.funcao()}>
                             <img src={EstIcon} className="w-7 h-7 object-contain" alt="Estrutura"/>
-                            <h2>Árvore</h2> 
+                            <h2>Árvore binária de busca</h2> 
                         </Link>   
                     </div>
 
