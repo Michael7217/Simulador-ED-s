@@ -1,7 +1,8 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {Outlet} from 'react-router-dom'
 import Header from '../components/Header'
 import Sidebar from '../components/Sidebar'
+import Footer from '../components/Footer'
 
 export default function Layout(){
     const [Est, SetEst] = useState(false)
@@ -12,6 +13,15 @@ export default function Layout(){
             SetEst(!Est)
         }
     }
+    useEffect(()=>{
+        if(Est == true){
+            document.documentElement.style.overflow = 'hidden'
+            document.body.style.overflow = 'hidden'
+        }else{
+            document.documentElement.style.overflow = 'auto'
+            document.body.style.overflow = 'auto'
+        }   
+    },[Est])
     return(
         <>
             <Header funcao={AtivarMenu}/>
@@ -19,7 +29,7 @@ export default function Layout(){
             <main>
                 <Outlet/>
             </main>
-            {/* <Footer/> */}
+            <Footer/>
         </>
         )
     }
