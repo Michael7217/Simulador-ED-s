@@ -9,11 +9,10 @@ export const removerAvl = (valor) => {
 }
 
 /* visualizar avl */
-
-export const VisulizarBalsAvl = () => {
-    return Api.get(('/api/avl/estrutura'));
-}
-
 export const visualizarArvore = () => {
     return Api.get(('/api/avl/arvore'));
+}
+
+export const visualizarBalsAvl = () => {
+    return Api.get(('/api/avl/balanceamento'));
 }
