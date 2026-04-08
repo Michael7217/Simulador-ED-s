@@ -20,10 +20,6 @@ const serviceMap = {
         'Adicionar': listaServices.adicionarListaOrdenado,
         'Remover': listaServices.removerListaOrdenado,
     },
-    'arvore': {
-        'Adicionar': abbServices.inserirAbb,
-        'Remover': abbServices.removerAbb,
-    },
     'arvore-binaria': {
         'Adicionar': abbServices.inserirAbb,
         'Remover': abbServices.removerAbb,
