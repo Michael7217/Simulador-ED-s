@@ -49,21 +49,21 @@ export default function ZoomableStage({ width, height, children }) {
         <button
           onClick={() => setScale(s => Math.min(3, s * 1.2))}
           className='bg-azul text-amarelo border-2 border-amarelo rounded-lg px-3 py-1 text-xs font-bold hover:bg-amarelo hover:text-azul transition-colors'
-          title='Zoom In'
+          title='Aumentar Zoom'
         >
           +
         </button>
         <button
           onClick={() => setScale(s => Math.max(0.7, s * 0.8))}
           className='bg-azul text-amarelo border-2 border-amarelo rounded-lg px-3 py-1 text-xs font-bold hover:bg-amarelo hover:text-azul transition-colors'
-          title='Zoom Out'
+          title='Diminuir Zoom'
         >
           −
         </button>
         <button
           onClick={handleReset}
           className='bg-azul text-amarelo border-2 border-amarelo rounded-lg px-3 py-1 text-xs font-bold hover:bg-amarelo hover:text-azul transition-colors'
-          title='Reset'
+          title='Redefinir'
         >
           ⟲
         </button>

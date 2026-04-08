@@ -55,11 +55,11 @@ const estruturas = [
         )
     },
     {
-        slug: 'arvore',
-        titulo: "Árvore binária de busca",
+        slug: 'arvore-rn',
+        titulo: "árvore rubro negra",
         conteudo: (
             <>
-            <h1>O que é Árvore?</h1>
+            <h1>O que é Árvore rubro negra?</h1>
             <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Quasi accusantium aut optio obcaecati, corrupti unde voluptas ratione consequatur, repellat sequi dolorem minus magni numquam a iste recusandae. Ipsam, repudiandae architecto.</p>
             </>
         )

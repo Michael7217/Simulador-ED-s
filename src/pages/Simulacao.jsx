@@ -7,6 +7,7 @@ import VisualizadorPilha from '../components/desenho/VisualizadorPilha';
 import VisualizadorLista from '../components/desenho/VisualizadorLista';
 import VisualizadorABB from '../components/desenho/VisualizadorABB';
 import VisualizadorAVL from '../components/desenho/VisualizadorAVL';
+import VisualizadorARN from '../components/desenho/VisualizadorARN';
 
 const visualizerMap = {
     'fila': VisualizadorFila,
@@ -14,6 +15,7 @@ const visualizerMap = {
     'lista-encadeada': VisualizadorLista,
     'arvore': VisualizadorABB,
     'arvore-binaria': VisualizadorABB,
+    'arvore-rn': VisualizadorARN,
     'arvore-avl': VisualizadorAVL,
 };
 
@@ -22,17 +24,9 @@ export default function Simulacao(){
     const nome = pagina.pathname.split('/').pop();
     
     const Visualizer = visualizerMap[nome];
-    
-    const acoes = [
-        'Adicionar',
-        'Remover',
-        'Avançar',
-        'Voltar'
-    ];
 
     const handleSuccess = (data) => {
         console.log('Operação bem-sucedida:', data);
-        // O visualizador recarrega automaticamente via useEffect
     };
 
     return(
@@ -53,17 +47,17 @@ export default function Simulacao(){
                 )}
             </div>
             <div className='border-4 border-azul rounded-2xl w-2/10 h-60 flex flex-col'>
-                <Button acao={acoes[0]} onSuccess={handleSuccess}>
-                    <p>{acoes[0]}</p>
+                <Button acao='Adicionar' onSuccess={handleSuccess}>
+                    <p>Inserir</p>
                 </Button>
-                <Button acao={acoes[1]} onSuccess={handleSuccess}>
-                    <p>{acoes[1]}</p>
+                <Button acao='Remover' onSuccess={handleSuccess}>
+                    <p>Remover</p>
                 </Button>
-                <button acao={acoes[2]} className='border-2 rounded-2xl flex justify-center items-center text-2xs font-medium text-amarelo p-2 m-1 mt-2 bg-[rgba(0,0,0,0.2)] cursor-pointer'>
-                    <p>{acoes[2]}</p>
+                <button className='border-2 rounded-2xl flex justify-center items-center text-2xs font-medium text-amarelo p-2 m-1 mt-2 bg-[rgba(0,0,0,0.2)] cursor-pointer'>
+                    <p>Avançar</p>
                 </button>
-                <button acao={acoes[3]} className='border-2 rounded-2xl flex justify-center items-center text-2xs font-medium text-amarelo p-2 m-1 mt-2 bg-[rgba(0,0,0,0.2)] cursor-pointer'>
-                    <p>{acoes[3]}</p>
+                <button className='border-2 rounded-2xl flex justify-center items-center text-2xs font-medium text-amarelo p-2 m-1 mt-2 bg-[rgba(0,0,0,0.2)] cursor-pointer'>
+                    <p>Voltar</p>
                 </button>
             </div>
         </div>
