@@ -10,9 +10,9 @@ export default function AppRoutes(){
         <Routes>
             <Route path='/' element={<Layout/>}>
                 <Route index element={<Home/>}/>
-                <Route path='/simulacao/:estrutura' element={<Simulacao/>}/>
-                <Route path='/conceito/:estrutura' element={<Conteudo/>}/>
-                <Route path='/sobre' element={<Sobre/>}/>
+                <Route path='simulacao/:estrutura' element={<Simulacao/>}/>
+                <Route path='conceito/:estrutura' element={<Conteudo/>}/>
+                <Route path='sobre' element={<Sobre/>}/>
             </Route>
         </Routes>
     )

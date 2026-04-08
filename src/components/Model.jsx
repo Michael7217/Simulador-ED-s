@@ -78,17 +78,17 @@ export default function Model(props){
         <>
         {props.estado && (
                 <div 
-                    className="fixed inset-0 bg-white/50 z-40 transition-opacity" onClick={handleClose}
+                    className="fixed inset-0 bg-black/20 z-40 transition-opacity" onClick={handleClose}
                 ></div>
             )}
-        <div className={`${props.estado ? "right-[30%]" : "hidden"} fixed flex flex-col z-50 bg-azul border-4 rounded-2xl border-amarelo items-center justify-center w-1/2 mx-auto my-[5%] gap-6 p-4 md:w-1/3 md:h-1/3`}>
-            <form onSubmit={enviarForm} className='flex flex-col gap-4 items-center w-1/2 justify-center '>
-                <div className='text-2xl md:text-3xl font-bold text-amarelo drop-shadow-md [-webkit-text-stroke:1px_black]'>
+        <div className={`${props.estado ? "flex" : "hidden"} fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex-col z-50 bg-azul border-4 rounded-2xl border-amarelo items-center justify-center w-[85%] max-w-sm p-6 shadow-2xl`}>
+            <form onSubmit={enviarForm} className='flex flex-col gap-4 items-center w-full justify-center'>
+                <div className='text-2xl md:text-3xl font-bold text-amarelo drop-shadow-md [-webkit-text-stroke:1px_black] text-center'>
                     <h1>{props.acao}</h1>
                 </div>
-                <p className='text-[10px] text-ciano'>para cancelar a ação pressione esc ou clique em qualquer lugar</p>
+                <p className='text-[10px] text-ciano text-center'>para cancelar a ação pressione esc ou clique em qualquer lugar</p>
                 {needsInput && (
-                    <div>
+                    <div className="w-full">
                         <input 
                             value={valor} 
                             onChange={(e) => setValor(e.target.value)} 
@@ -96,12 +96,12 @@ export default function Model(props){
                             name="numero" 
                             id="1" 
                             placeholder='digite um número' 
-                            className='border-2 rounded-xl border-ciano h-10 w-70'
+                            className='border-2 rounded-xl border-ciano h-10 w-full px-4 text-center text-azul bg-branco focus:outline-none focus:border-amarelo'
                             required
                         />
                     </div>
                 )}
-                <button type='submit' disabled={loading} className='border-4 rounded-2xl px-7 py-1 text-xl text-amarelo border-amarelo bg-[rgba(0,0,0,0.2)] cursor-pointer font-medium disabled:opacity-50 disabled:cursor-not-allowed'>
+                <button type='submit' disabled={loading} className='border-4 rounded-2xl w-full py-2 text-xl text-amarelo border-amarelo bg-[rgba(0,0,0,0.2)] cursor-pointer font-medium disabled:opacity-50 disabled:cursor-not-allowed mt-2 hover:bg-amarelo/20 transition-colors'>
                     {loading ? 'Enviando...' : props.acao}
                 </button>
             </form>

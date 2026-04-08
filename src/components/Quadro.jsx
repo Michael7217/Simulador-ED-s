@@ -8,7 +8,7 @@ const estruturas = [
     { nome: 'Árvore Binária', path: '/arvore-binaria' },
     { nome: 'Pilha', path: '/pilha' },
     { nome: 'Árvore AVL', path: '/arvore-avl' },
-    { nome: 'Árvore binária de busca', path: '/arvore' }
+    { nome: 'Árvore rubro negra', path: '/arvore-rn' }
 ]
 
 export default function Quadro({index}){
@@ -16,7 +16,7 @@ export default function Quadro({index}){
     const estrutura = estruturas[index] || { nome: 'Estrutura', path: '/' };
     
     return (
-        <div onClick={() => navigate('simulacao'+estrutura.path)}className="flex justify-between w-full h-auto md:h-32 border-4 border-branco rounded-2xl cursor-pointer p-4 md:p-6 hover:shadow-lg transition-shadow">
+            <div onClick={() => navigate('/simulacao'+estrutura.path)} className="flex justify-between w-full h-auto md:h-32 border-4 border-branco rounded-2xl cursor-pointer p-4 md:p-6 hover:shadow-lg transition-shadow">
             <div className="h-full flex flex-col gap-2 justify-center flex-1">
                 <h1 className="text-lg md:text-2xl font-semibold">{estrutura.nome}</h1>
                 <p className="text-sm md:text-base">Conceito</p>

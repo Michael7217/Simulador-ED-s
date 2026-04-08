@@ -1,6 +1,5 @@
 import React from "react";
 import { useParams } from 'react-router-dom';
-import OptionIcon from '../assets/OptionIcon.png';
 import Titulo from '../components/Titulo';
 
 const estruturas = [
@@ -9,8 +8,17 @@ const estruturas = [
         titulo: "Lista Encadeada",
         conteudo: (
             <>
-            <h1>O que é Lista Encadeada?</h1>
-            <p>Lorem ipsum dolor, sit amet consectetur adipisicing elit. Fuga magnam unde facilis asperiores quasi libero modi illo, eum est et explicabo optio, nam accusantium autem? Adipisci perferendis atque dicta iusto!</p>
+                <p className="mb-2">
+                    Uma <strong>lista encadeada</strong> é uma estrutura de dados linear formada por nós ligados entre si por ponteiros (referências).
+                </p>
+                <p className="mb-2">Cada nó da lista possui duas partes principais:</p>
+                <ul className="list-disc list-inside ml-4 mb-4">
+                    <li><strong>Dado:</strong> o valor armazenado.</li>
+                    <li><strong>Ponteiro:</strong> a referência que aponta para o próximo nó da sequência.</li>
+                </ul>
+                <p>
+                    Diferente de um vetor (array), os elementos da lista encadeada não ficam em posições consecutivas na memória. Isso permite que a lista cresça e diminua dinamicamente durante a execução do programa, sem desperdício de espaço.
+                </p>
             </>
         )
     },
@@ -19,18 +27,17 @@ const estruturas = [
         titulo: "Fila",
         conteudo: (
             <>
-            <h1>O que é Fila?</h1>
-            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Sint quibusdam nihil inventore consequuntur vitae ipsa distinctio eum atque autem qui ullam sapiente id, porro voluptas! Minima atque provident deleniti dolores?</p>
-            </>
-        )
-    },
-    {
-        slug: 'arvore-binaria',
-        titulo: "Árvore Binária",
-        conteudo: (
-            <>
-            <h1>O que é Árvore Binária?</h1>
-            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Eveniet debitis quo quidem delectus nemo natus aperiam saepe earum consectetur! Facilis maxime consectetur exercitationem ex asperiores quo placeat quam, quisquam nesciunt.</p>
+                <p className="mb-2">
+                    Uma <strong>fila</strong> é uma estrutura de dados linear que segue o princípio <strong>FIFO</strong> (<em>First In, First Out</em> — O primeiro a entrar é o primeiro a sair).
+                </p>
+                <p className="mb-2">Assim como em uma fila de pessoas em um banco, as operações possuem regras estritas:</p>
+                <ul className="list-disc list-inside ml-4 mb-4">
+                    <li><strong>Enfileirar (Enqueue):</strong> Novos elementos são adicionados sempre no <strong>fundo</strong> (final) da fila.</li>
+                    <li><strong>Desenfileirar (Dequeue):</strong> A remoção ocorre sempre na <strong>frente</strong> (início) da fila.</li>
+                </ul>
+                <p>
+                    Filas são amplamente utilizadas em sistemas operacionais, como no escalonamento de processos, gerenciamento de requisições web e filas de impressão.
+                </p>
             </>
         )
     },
@@ -39,8 +46,56 @@ const estruturas = [
         titulo: "Pilha",
         conteudo: (
             <>
-            <h1>O que é Pilha?</h1>
-            <p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Animi laudantium saepe enim non similique veniam recusandae pariatur perspiciatis fugiat cupiditate omnis maxime dignissimos doloribus tempora iste, iusto optio, porro velit!</p>
+                <p className="mb-2">
+                    Uma <strong>pilha</strong> é uma estrutura de dados linear baseada no princípio <strong>LIFO</strong> (<em>Last In, First Out</em> — O último a entrar é o primeiro a sair).
+                </p>
+                <p className="mb-2">Imagine uma pilha real de pratos: você só pode interagir com o prato que está em cima. Suas operações principais são:</p>
+                <ul className="list-disc list-inside ml-4 mb-4">
+                    <li><strong>Empilhar (Push):</strong> Insere um novo elemento no <strong>topo</strong> da pilha.</li>
+                    <li><strong>Desempilhar (Pop):</strong> Remove o elemento que está no <strong>topo</strong> da pilha.</li>
+                </ul>
+                <p>
+                    As pilhas são essenciais na computação, sendo usadas para implementar o mecanismo de "Desfazer" nos editores de texto, a navegação de voltar nos navegadores de internet e o controle de chamadas de funções (Call Stack) na memória.
+                </p>
+            </>
+        )
+    },
+    {
+        slug: 'arvore-binaria',
+        titulo: "Árvore Binária",
+        conteudo: (
+            <>
+                <p className="mb-2">
+                    Uma <strong>árvore binária</strong> é uma estrutura de dados hierárquica (não linear) onde cada elemento, chamado de <strong>nó</strong>, pode ter no máximo <strong>dois filhos</strong> (um à esquerda e um à direita).
+                </p>
+                <p className="mb-2">Os componentes principais de uma árvore são:</p>
+                <ul className="list-disc list-inside ml-4 mb-4">
+                    <li><strong>Raiz:</strong> O nó superior e inicial da árvore.</li>
+                    <li><strong>Folhas:</strong> Nós que estão na ponta e não possuem nenhum filho.</li>
+                    <li><strong>Arestas:</strong> As conexões que ligam os nós.</li>
+                </ul>
+                <p>
+                    As árvores são excelentes para representar hierarquias, como o sistema de pastas do seu computador, ou para servir de base estrutural para algoritmos mais complexos.
+                </p>
+            </>
+        )
+    },
+    {
+        slug: 'arvore',
+        titulo: "Árvore Binária de Busca",
+        conteudo: (
+            <>
+                <p className="mb-2">
+                    A <strong>Árvore Binária de Busca (ABB)</strong> é uma árvore binária com uma regra rigorosa de organização que permite localizar dados rapidamente.
+                </p>
+                <p className="mb-2">Para qualquer nó dentro dessa árvore:</p>
+                <ul className="list-disc list-inside ml-4 mb-4">
+                    <li>Todos os valores na sua subárvore <strong>esquerda</strong> são <strong>menores</strong> que o valor do nó.</li>
+                    <li>Todos os valores na sua subárvore <strong>direita</strong> são <strong>maiores</strong> que o valor do nó.</li>
+                </ul>
+                <p>
+                    Devido a essa organização, a cada passo de uma busca, você descarta metade da árvore. Isso torna as operações de busca, inserção e remoção extremamente eficientes em comparação com listas tradicionais.
+                </p>
             </>
         )
     },
@@ -49,33 +104,33 @@ const estruturas = [
         titulo: "Árvore AVL",
         conteudo: (
             <>
-            <h1>O que é Árvore AVL?</h1>
-            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Qui, magnam molestias nostrum pariatur maxime officiis hic dolore. Quas nemo, commodi sit voluptas, modi perspiciatis praesentium fugiat, vel facilis tenetur tempora.</p>
-            </>
-        )
-    },
-    {
-        slug: 'arvore',
-        titulo: "Árvore binária de busca",
-        conteudo: (
-            <>
-            <h1>O que é Árvore?</h1>
-            <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Quasi accusantium aut optio obcaecati, corrupti unde voluptas ratione consequatur, repellat sequi dolorem minus magni numquam a iste recusandae. Ipsam, repudiandae architecto.</p>
+                <p className="mb-2">
+                    A <strong>Árvore AVL</strong> é uma árvore binária de busca <strong>autobalanceada</strong> (seu nome vem dos criadores: Adelson-Velsky e Landis).
+                </p>
+                <p className="mb-2">
+                    O grande problema das árvores de busca comuns é que, dependendo de como os dados são inseridos, elas podem crescer apenas para um lado e virar uma linha reta, perdendo sua eficiência. A AVL resolve isso impondo uma regra matemática:
+                </p>
+                <ul className="list-disc list-inside ml-4 mb-4">
+                    <li>O <strong>Fator de Balanceamento</strong> (a diferença de altura entre o lado esquerdo e direito de qualquer nó) não pode ser maior que 1 ou menor que -1.</li>
+                </ul>
+                <p>
+                    Sempre que essa regra é quebrada após inserir ou remover um dado, a estrutura realiza <strong>rotações automáticas</strong> para se reequilibrar, garantindo que o tempo de busca seja sempre o mais rápido possível.
+                </p>
             </>
         )
     }
 ];
 
-export default function Conceito(){
+export default function Conceito() {
     const { estrutura } = useParams();
     const estruturaAtual = estruturas.find(item => item.slug === estrutura) || estruturas[0];
 
-    return(
-        <div className="w-full min-h-screen p-1 font-sans text-azul">
-            <div className="flex items-center gap-2 mb-2">
+    return (
+        <div className="w-full min-h-screen p-4 md:p-8 font-sans text-azul max-w-4xl mx-auto">
+            <div className="flex items-center gap-2 mb-6">
                 <Titulo nome={(estruturaAtual.titulo).toLowerCase()}></Titulo>
             </div>
-            <div className="font-medium text-base md:text-lg leading-relaxed flex flex-col gap-4">
+            <div className="font-medium text-base md:text-lg leading-relaxed text-justify bg-white/20 p-6 rounded-2xl border-2 border-azul/10 shadow-sm">
                 {estruturaAtual.conteudo}
             </div>
         </div>

@@ -7,16 +7,8 @@ const RAIO            = 26;
 const ESPACO_VERTICAL = 82;
 const MARGEM          = 50;
 
-// ─── Parse ["Chave: 20 | Bal: 1", ...] ───────────────────────────────────────
-function parseBals(arr) {
-  const m = {};
-  (arr || []).forEach(s => {
-    const c = s.match(/Chave:\s*(\d+)/);
-    const b = s.match(/Bal:\s*(-?\d+)/);
-    if (c && b) m[parseInt(c[1])] = parseInt(b[1]);
-  });
-  return m;
-}
+// ─── Parse ["Chave: 20 | Equilíbrio: 1", ...] ───────────────────────────────────────
+
 
 function corBal(b) {
   if (Math.abs(b) <= 1) return '#34d399';

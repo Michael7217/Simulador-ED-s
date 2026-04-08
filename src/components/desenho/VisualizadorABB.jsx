@@ -68,17 +68,17 @@ export default function ABBVisualizer({ onAcoes }) {
   const [largura, setLargura]                   = useState(600);
   const [altura, setAltura]                     = useState(500);
 
-  const carregar = async () => {
+  const load = async () => {
     try { const r = await visualizarAbb(); setArvore(r.data || null); }
     catch { setArvore(null); }
   };
 
-  useEffect(() => { carregar(); }, []);
+  useEffect(() => { load(); }, []);
 
   // Recarrega periodicamente
   useEffect(() => {
     const interval = setInterval(() => {
-      carregar();
+      load();
     }, 2000);
     return () => clearInterval(interval);
   }, []);
@@ -106,13 +106,13 @@ export default function ABBVisualizer({ onAcoes }) {
       inserir: async (valor) => {
         const val = parseInt(valor);
         if (isNaN(val)) return avisar('Valor inválido!', '#ff4466');
-        try { await inserirAbb(val); setTimeout(() => carregar(), 300); avisar(`Inserido ${val}`); }
+        try { await inserirAbb(val); setTimeout(() => load(), 300); avisar(`Inserido ${val}`); }
         catch { avisar('Erro ao inserir!', '#ff4466'); }
       },
       remover: async (valor) => {
         const val = parseInt(valor);
         if (isNaN(val)) return avisar('Valor inválido!', '#ff4466');
-        try { await removerAbb(val); setTimeout(() => carregar(), 300); avisar(`Removido ${val}`); }
+        try { await removerAbb(val); setTimeout(() => load(), 300); avisar(`Removido ${val}`); }
         catch { avisar('Erro ao remover!', '#ff4466'); }
       },
       preOrdem: async () => {
