@@ -21,10 +21,10 @@ export default function Sobre() {
 
                 <div className="space-y-6 text-base md:text-lg leading-relaxed text-justify">
                     <p>
-                        Lorem ipsum dolor, sit amet consectetur adipisicing elit. Fuga magnam unde facilis asperiores quasi libero modi illo, eum est et explicabo optio, nam accusantium autem? Adipisci perferendis atque dicta iusto!
+                        O <strong>Simulador ED's</strong> é uma plataforma interativa de cunho educacional, criada com o objetivo de facilitar o aprendizado e a compreensão visual das Estruturas de Dados. Acreditamos que a abstração de conceitos como ponteiros, nós e balanceamento de árvores se torna muito mais intuitiva quando o estudante pode acompanhar, na prática, o comportamento da memória.
                     </p>
                     <p>
-                        Lorem ipsum dolor, sit amet consectetur adipisicing elit. Fuga magnam unde facilis asperiores quasi libero modi illo, eum est et explicabo optio, nam accusantium autem? Adipisci perferendis atque dicta iusto!
+                        Por meio de nosso canvas dinâmico, o projeto permite que os usuários realizem operações de inserção, remoção e navegação em tempo real nas estruturas clássicas da computação: Listas Encadeadas, Filas, Pilhas e Árvores (Binária de Busca e AVL). Esta ferramenta foi projetada para preencher a lacuna entre a teoria fundamentada e a prática visual.
                     </p>
                     
                     <div className="mt-10 bg-ciano/10 p-6 rounded-xl border border-ciano/20">
@@ -33,7 +33,7 @@ export default function Sobre() {
                             Equipe de Desenvolvimento
                         </h3>
                         <p className="mb-4">
-                            Este projeto foi idealizado e construído por estudantes da Universidade Federal do Ceará - Campus de Russas:
+                            Este projeto foi idealizado e construído por estudantes de engenharia de software da Universidade Federal do Ceará (UFC) - Campus de Russas.
                         </p>
                         <ul className="list-disc list-inside space-y-2 pl-2 text-lg font-medium text-branco">
                             <li>Michael Charlys Moreira da Silva</li>
