@@ -81,21 +81,12 @@ const estruturas = [
         )
     },
     {
-        slug: 'arvore',
-        titulo: "Árvore Binária de Busca",
+        slug: 'arvore-rubro-negra',
+        titulo: "árvore rubro negra",
         conteudo: (
             <>
-                <p className="mb-2">
-                    A <strong>Árvore Binária de Busca (ABB)</strong> é uma árvore binária com uma regra rigorosa de organização que permite localizar dados rapidamente.
-                </p>
-                <p className="mb-2">Para qualquer nó dentro dessa árvore:</p>
-                <ul className="list-disc list-inside ml-4 mb-4">
-                    <li>Todos os valores na sua subárvore <strong>esquerda</strong> são <strong>menores</strong> que o valor do nó.</li>
-                    <li>Todos os valores na sua subárvore <strong>direita</strong> são <strong>maiores</strong> que o valor do nó.</li>
-                </ul>
-                <p>
-                    Devido a essa organização, a cada passo de uma busca, você descarta metade da árvore. Isso torna as operações de busca, inserção e remoção extremamente eficientes em comparação com listas tradicionais.
-                </p>
+            <h1>O que é Árvore rubro negra?</h1>
+            <p>Uma Árvore Rubro-Negra é uma árvore binária de busca auto-balanceada que organiza dados de forma eficiente, garantindo operações rápidas de busca, inserção e remoção com complexidade aproximada de O(log n). Ela utiliza nós coloridos em vermelho e preto e segue regras específicas — como manter a raiz preta, evitar dois nós vermelhos consecutivos e garantir o mesmo número de nós pretos em todos os caminhos da raiz até as folhas — para preservar o balanceamento automaticamente. Por isso, é muito utilizada em sistemas reais e bibliotecas de programação que exigem desempenho e organização eficiente dos dados.</p>
             </>
         )
     },
