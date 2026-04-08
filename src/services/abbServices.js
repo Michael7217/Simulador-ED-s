@@ -1,4 +1,5 @@
 import Api from './api';
+import { SessionId } from '../utils/sessionId';
 
 export const  inserirAbb = (valor) => {
     return Api.post((`/api/abb/inserir/${valor}`));
@@ -24,5 +25,13 @@ export const emOrdem = () => {
 
 /* visualizar arvore */
 export const visualizarAbb = () => {
-    return Api.get(('/api/abb/arvore'));
+    return Api.get((`/api/abb/arvore?sessionId=${SessionId()}`));
+}
+
+export const desfazerAbb = () => {
+    return Api.post('/api/abb/desfazer');
+}
+
+export const refazerAbb = () => {
+    return Api.post('/api/abb/refazer')
 }

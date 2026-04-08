@@ -1,4 +1,3 @@
-
 import Titulo from '../components/Titulo';
 import { useLocation } from 'react-router-dom';
 import Button from '../components/Button';
@@ -8,8 +7,14 @@ import VisualizadorLista from '../components/desenho/VisualizadorLista';
 import VisualizadorABB from '../components/desenho/VisualizadorABB';
 import VisualizadorAVL from '../components/desenho/VisualizadorAVL';
 import VisualizadorARN from '../components/desenho/VisualizadorARN';
+import * as filaServices from '../services/filaservices';
+import * as pilhaServices from '../services/pilhaServices';
+import * as listaServices from '../services/listaservices';
+import * as abbServices from '../services/abbServices';
+import * as avlServices from '../services/avlServices';
+import * as rnServices from '../services/rnServices';
 
-const visualizerMap = {
+const visualizadormap = {
     'fila': VisualizadorFila,
     'pilha': VisualizadorPilha,
     'lista-encadeada': VisualizadorLista,
@@ -19,18 +24,60 @@ const visualizerMap = {
     'arvore-avl': VisualizadorAVL,
 };
 
+const refazerDesfazer = {
+    'fila': {
+        'Refazer': filaServices.refazerFila,
+        'Desfazer': filaServices.desfazerFila,
+    },
+    'pilha': {
+        'Refazer': pilhaServices.refazerPilha,
+        'Desfazer': pilhaServices.desfazerPilha,
+    },
+    'lista-encadeada': {
+        'Refazer': listaServices.refazerLista,
+        'Desfazer': listaServices.desfazerLista,
+    },
+    'arvore-binaria': {
+        'Refazer': abbServices.refazerAbb,
+        'Desfazer': abbServices.desfazerAbb,
+    },
+    'arvore-avl': {
+        'Refazer': avlServices.refazerAvl,
+        'Desfazer': avlServices.desfazerAvl,
+    },
+    'arvore-rubro-negra': {
+        'Refazer': rnServices.refazerRn,
+        'Desfazer': rnServices.desfazerRn,
+    },
+};
+
+
 export default function Simulacao(){
     const pagina = useLocation();
     const nome = pagina.pathname.split('/').pop();
     
-    const Visualizer = visualizerMap[nome];
+    const Visualizer = visualizadormap[nome];
     
     const acoes = [
         'Adicionar',
         'Remover',
-        'Avançar',
-        'Voltar'
+        'Refazer',
+        'Desfazer'
     ];
+
+    const handleUndoRedo = async (acao) => {
+        try {
+            const serviceFunction = refazerDesfazer[nome]?.[acao];
+            if (!serviceFunction) {
+                throw new Error(`Serviço não encontrado para ${nome} - ${acao}`);
+            }
+            const response = await serviceFunction();
+            handleSuccess(response.data);
+        } catch (error) {
+            console.error('Erro ao executar operação:', error);
+            alert('Erro ao executar operação');
+        }
+    };
 
     const handleSuccess = (data) => {
         console.log('Operação bem-sucedida:', data);
@@ -60,17 +107,23 @@ export default function Simulacao(){
                 <h2 className='text-amarelo text-xl font-bold drop-shadow-xs mb-2 text-center [-webkit-text-stroke:0.8px_black]'>
                     Operações
                 </h2>
-                <div className='border-4 border-azul rounded-2xl w-full h-auto min-h-60 flex flex-col p-2 gap-2'>
+                <div className='text-xl border-4 border-azul rounded-2xl w-full h-auto min-h-60 flex flex-col p-2 gap-2'>
                     <Button acao={acoes[0]} onSuccess={handleSuccess}>
                         <p>{acoes[0]}</p>
                     </Button>
                     <Button acao={acoes[1]} onSuccess={handleSuccess}>
                         <p>{acoes[1]}</p>
                     </Button>
-                    <button className='border-2 rounded-2xl flex justify-center items-center text-xl font-medium text-amarelo p-2 bg-[rgba(0,0,0,0.2)] cursor-pointer'>
+                    <button 
+                        onClick={() => handleUndoRedo(acoes[2])} 
+                        className='border-2 rounded-2xl flex justify-center items-center text-xl font-medium text-amarelo p-2 bg-[rgba(0,0,0,0.2)] cursor-pointer'
+                    >
                         <p>{acoes[2]}</p>
                     </button>
-                    <button className='border-2 rounded-2xl flex justify-center items-center text-xl font-medium text-amarelo p-2 bg-[rgba(0,0,0,0.2)] cursor-pointer'>
+                    <button 
+                        onClick={() => handleUndoRedo(acoes[3])} 
+                        className='border-2 rounded-2xl flex justify-center items-center text-xl font-medium text-amarelo p-2 bg-[rgba(0,0,0,0.2)] cursor-pointer'
+                    >
                         <p>{acoes[3]}</p>
                     </button>
                 </div>
