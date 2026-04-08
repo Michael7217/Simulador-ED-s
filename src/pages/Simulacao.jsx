@@ -15,7 +15,7 @@ const visualizerMap = {
     'lista-encadeada': VisualizadorLista,
     'arvore': VisualizadorABB,
     'arvore-binaria': VisualizadorABB,
-    'arvore-rn': VisualizadorARN,
+    'arvore-rubro-negra': VisualizadorARN,
     'arvore-avl': VisualizadorAVL,
 };
 

@@ -73,7 +73,7 @@ export default function Sidebar(props) {
                     </div>
 
                     <div className="border-b-2 border-ciano py-3">
-                        <Link to='/simulacao/arvore-rn' className="flex items-center gap-3 text-lg text-amarelo hover:text-branco! transition-colors" onClick={handleClose}>
+                        <Link to='/simulacao/arvore-rubro-negra' className="flex items-center gap-3 text-lg text-amarelo hover:text-branco! transition-colors" onClick={handleClose}>
                             <img src={EstIcon} className="w-7 h-7 object-contain" alt="Estrutura"/>
                             <h2>Árvore rubro negra</h2> 
                         </Link>   
