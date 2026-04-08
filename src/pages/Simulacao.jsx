@@ -24,9 +24,17 @@ export default function Simulacao(){
     const nome = pagina.pathname.split('/').pop();
     
     const Visualizer = visualizerMap[nome];
+    
+    const acoes = [
+        'Adicionar',
+        'Remover',
+        'Avançar',
+        'Voltar'
+    ];
 
     const handleSuccess = (data) => {
         console.log('Operação bem-sucedida:', data);
+        // O visualizador recarrega automaticamente via useEffect
     };
 
     return(

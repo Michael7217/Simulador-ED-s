@@ -1,11 +1,11 @@
 import React, { useState, useCallback } from 'react'
+import Titulo from './Titulo'
 import { useLocation } from 'react-router-dom'
 import * as filaServices from '../services/filaservices'
 import * as pilhaServices from '../services/pilhaServices'
 import * as listaServices from '../services/listaservices'
 import * as abbServices from '../services/abbServices'
 import * as avlServices from '../services/avlServices'
-import * as rnServices from '../services/rnServices'
 
 const serviceMap = {
     'fila': {
@@ -31,10 +31,6 @@ const serviceMap = {
     'arvore-avl': {
         'Adicionar': avlServices.inserirAvl,
         'Remover': avlServices.removerAvl,
-    },
-    'arvore-rn': {
-        'Adicionar': rnServices.inserirRn,
-        'Remover': rnServices.removerRn,
     },
 };
 
