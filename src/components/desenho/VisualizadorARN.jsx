@@ -257,9 +257,13 @@ export default function RubroNegraVisualizer({ onAcoes }) {
   const nos = arvore ? posicoes(arvore, 0, 0, 1) : [];
   const edges = arvore ? arestas(arvore, 0, 0, 1) : [];
   const negros = alturaNegra(arvore);
+  const maxNosBase = Math.pow(2, Math.max(0, prof - 1));
+  const espacoMinimo = maxNosBase * (RAIO * 3);
+  const larguraDesenho = Math.max(largura, espacoMinimo);
+  const offsetCentralizacao = (larguraDesenho - largura) / 2;
 
   const toCanvas = (xN, p) => ({
-    x: MARGEM + xN * (largura - MARGEM * 2),
+    x: MARGEM + (xN * (larguraDesenho - MARGEM * 2)) - offsetCentralizacao,
     y: 60 + p * ESPACO_VERTICAL,
   });
 

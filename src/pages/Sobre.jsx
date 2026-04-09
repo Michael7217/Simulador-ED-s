@@ -33,7 +33,7 @@ export default function Sobre() {
                             Equipe de Desenvolvimento
                         </h3>
                         <p className="mb-4">
-                            Este projeto foi idealizado e construído por estudantes de engenharia de software da Universidade Federal do Ceará (UFC) - Campus de Russas.
+                            Este projeto foi idealizado e construído por estudantes da Universidade Federal do Ceará (UFC) - Campus de Russas.
                         </p>
                         <ul className="list-disc list-inside space-y-2 pl-2 text-lg font-medium text-branco">
                             <li>Michael Charlys Moreira da Silva</li>
