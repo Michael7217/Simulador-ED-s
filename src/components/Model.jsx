@@ -75,9 +75,14 @@ export default function Model(props){
     }, [valor, props, estrutura, needsInput]);
 
     const ref = useRef(null);
+    const buttonRef = useRef(null);
     useEffect(() => {
-        if (props.estado && needsInput && ref.current){
-            ref.current.focus();
+        if (props.estado) {
+            if (needsInput && ref.current) {
+                ref.current.focus();
+            } else if (!needsInput && buttonRef.current) {
+                buttonRef.current.focus();
+            }
         }
     }, [props.estado, needsInput])
 
@@ -110,7 +115,7 @@ export default function Model(props){
                         />)}
                     </div>
                 )}
-                <button type='submit' disabled={loading} className='border-4 rounded-2xl w-full py-2 text-xl text-amarelo border-amarelo bg-[rgba(0,0,0,0.2)] cursor-pointer font-medium disabled:opacity-50 disabled:cursor-not-allowed mt-2 hover:bg-amarelo/20 transition-colors'>
+                <button ref={buttonRef} type='submit' disabled={loading} className='border-4 rounded-2xl w-full py-2 text-xl text-amarelo border-amarelo bg-[rgba(0,0,0,0.2)] cursor-pointer font-medium disabled:opacity-50 disabled:cursor-not-allowed mt-2 hover:bg-amarelo/20 transition-colors'>
                     {loading ? 'Enviando...' : props.acao}
                 </button>
             </form>
