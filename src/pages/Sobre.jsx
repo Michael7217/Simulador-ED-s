@@ -37,8 +37,8 @@ export default function Sobre() {
                         </p>
                         <ul className="list-disc list-inside space-y-2 pl-2 text-lg font-medium text-branco">
                             <li>Michael Charlys Moreira da Silva</li>
-                            <li>Matheus de Assis</li>
-                            <li>Gabriel Gilvan</li>
+                            <li>Matheus de Assis Oliveira</li>
+                            <li>Gabriel Gilvan da Silva Dantas</li>
                         </ul>
                     </div>
                 </div>

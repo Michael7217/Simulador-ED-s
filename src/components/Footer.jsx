@@ -6,8 +6,8 @@ export default function Footer(){
             <div className='text-center md:text-left'>
                 <h2 className='text-xl font-bold text-amarelo mb-2'>Desenvolvido por:</h2>
                 <p>Michael Charlys Moreira da Silva</p>
-                <p>Matheus de Assis</p>
-                <p>Gabriel Gilvan</p>
+                <p>Matheus de Assis Oliveira</p>
+                <p>Gabriel Gilvan da Silva Dantas</p>
             </div>
             <div className='flex flex-col items-center text-sm'>
                 <img src={Logo} alt='logo' className='h-auto'></img>
