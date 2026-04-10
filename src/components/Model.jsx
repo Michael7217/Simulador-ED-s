@@ -76,10 +76,10 @@ export default function Model(props){
 
     const ref = useRef(null);
     useEffect(() => {
-        if (props.estado){
+        if (props.estado && needsInput && ref.current){
             ref.current.focus();
         }
-    })
+    }, [props.estado, needsInput])
 
     return(
         <>
@@ -96,6 +96,7 @@ export default function Model(props){
                 <p className='text-[10px] text-ciano text-center'>para cancelar a ação pressione esc ou clique em qualquer lugar</p>
                 {needsInput && (
                     <div className="w-full">
+                        {props.estado && (
                         <input 
                             value={valor} 
                             onChange={(e) => setValor(e.target.value)}
@@ -106,7 +107,7 @@ export default function Model(props){
                             placeholder='digite um número' 
                             className='border-2 rounded-xl border-ciano h-10 w-full px-4 text-center text-azul bg-branco focus:outline-none focus:border-amarelo'
                             required
-                        />
+                        />)}
                     </div>
                 )}
                 <button type='submit' disabled={loading} className='border-4 rounded-2xl w-full py-2 text-xl text-amarelo border-amarelo bg-[rgba(0,0,0,0.2)] cursor-pointer font-medium disabled:opacity-50 disabled:cursor-not-allowed mt-2 hover:bg-amarelo/20 transition-colors'>
