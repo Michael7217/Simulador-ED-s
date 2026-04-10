@@ -133,7 +133,7 @@ export default function Conceito() {
     return (
         <div className="w-full min-h-screen p-4 md:p-8 font-sans text-azul max-w-4xl mx-auto">
             <div className="flex items-center gap-2 mb-6">
-                <Titulo nome={(estruturaAtual.titulo).toLowerCase()}></Titulo>
+                <Titulo nome={estruturaAtual.titulo}></Titulo>
             </div>
             <div className="font-medium text-base md:text-lg leading-relaxed text-justify bg-white/20 p-6 rounded-2xl border-2 border-azul/10 shadow-sm">
                 {estruturaAtual.conteudo}

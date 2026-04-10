@@ -51,10 +51,21 @@ const refazerDesfazer = {
     },
 };
 
+const estruturasNomes = {
+    'fila': 'Fila',
+    'pilha': 'Pilha',
+    'lista-encadeada': 'Lista Encadeada',
+    'arvore-binaria': 'Árvore Binária',
+    'arvore-avl': 'Árvore AVL',
+    'arvore-rubro-negra': 'Árvore Rubro-Negra',
+};
+
 
 export default function Simulacao(){
     const pagina = useLocation();
-    const nome = pagina.pathname.split('/').pop();
+    let nome = pagina.pathname.split('/').pop();
+    let nomeTitulo = estruturasNomes[nome] || nome;
+
     
     const Visualizer = visualizadormap[nome];
     
@@ -86,10 +97,10 @@ export default function Simulacao(){
 
     return(
         <>
-        <Titulo nome={nome}/>
+        <Titulo nome={nomeTitulo}/>
         <div className='flex flex-col md:flex-row justify-around mx-6 gap-6 md:gap-0 mt-4 mb-8'>
             <div className='flex flex-col w-full md:w-2/3'>
-                <h2 className='text-amarelo text-xl font-bold drop-shadow-xs mb-2 text-center [-webkit-text-stroke:0.8px_black]'>
+                <h2 className='text-amarelo text-xl font-bold drop-shadow-xs drop-shadow-black mb-2 text-center'>
                     Simulação
                 </h2>
                 <div className='border-4 border-azul rounded-2xl h-[60vh] md:h-screen w-full overflow-hidden bg-white'>
@@ -104,7 +115,7 @@ export default function Simulacao(){
             </div>
 
             <div className='flex flex-col w-full md:w-1/4'>
-                <h2 className='text-amarelo text-xl font-bold drop-shadow-xs mb-2 text-center [-webkit-text-stroke:0.8px_black]'>
+                <h2 className='text-amarelo text-xl font-bold drop-shadow-xs drop-shadow-black mb-2 text-center'>
                     Operações
                 </h2>
                 <div className='text-xl border-4 border-azul rounded-2xl w-full h-auto min-h-60 flex flex-col p-2 gap-2'>

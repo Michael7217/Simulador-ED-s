@@ -3,12 +3,12 @@ import Seta from '../assets/Seta.png'
 import { useNavigate } from 'react-router-dom';
 
 const estruturas = [
-    { nome: 'Lista encadeada', path: '/lista-encadeada' },
+    { nome: 'Lista Encadeada', path: '/lista-encadeada' },
     { nome: 'Fila', path: '/fila' },
     { nome: 'Árvore Binária', path: '/arvore-binaria' },
     { nome: 'Pilha', path: '/pilha' },
     { nome: 'Árvore AVL', path: '/arvore-avl' },
-    { nome: 'Árvore rubro negra', path: '/arvore-rubro-negra' }
+    { nome: 'Árvore Rubro-Negra', path: '/arvore-rubro-negra' }
 ]
 
 export default function Quadro({index}){
