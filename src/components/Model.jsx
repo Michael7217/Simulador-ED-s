@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback, useEffect, useRef } from 'react'
 import { useLocation } from 'react-router-dom'
 import * as filaServices from '../services/filaservices'
 import * as pilhaServices from '../services/pilhaServices'
@@ -74,6 +74,13 @@ export default function Model(props){
         }
     }, [valor, props, estrutura, needsInput]);
 
+    const ref = useRef(null);
+    useEffect(() => {
+        if (props.estado){
+            ref.current.focus();
+        }
+    })
+
     return(
         <>
         {props.estado && (
@@ -91,7 +98,8 @@ export default function Model(props){
                     <div className="w-full">
                         <input 
                             value={valor} 
-                            onChange={(e) => setValor(e.target.value)} 
+                            onChange={(e) => setValor(e.target.value)}
+                            ref={ref}
                             type="number" 
                             name="numero" 
                             id="1" 
