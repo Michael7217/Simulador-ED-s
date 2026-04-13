@@ -95,7 +95,7 @@ export default function Model(props){
             )}
         <div className={`${props.estado ? "flex" : "hidden"} fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex-col z-50 bg-azul border-4 rounded-2xl border-amarelo items-center justify-center w-[85%] max-w-sm p-6 shadow-2xl`}>
             <form onSubmit={enviarForm} className='flex flex-col gap-4 items-center w-full justify-center'>
-                <div className='text-2xl md:text-3xl font-bold text-amarelo drop-shadow-md [-webkit-text-stroke:1px_black] text-center'>
+                <div className='text-2xl md:text-3xl font-bold text-amarelo drop-shadow-md drop-shadow-black text-center'>
                     <h1>{props.acao}</h1>
                 </div>
                 <p className='text-[10px] text-ciano text-center'>para cancelar a ação pressione esc ou clique em qualquer lugar</p>
