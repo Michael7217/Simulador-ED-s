@@ -1,6 +1,8 @@
 import Titulo from '../components/Titulo';
 import { useLocation } from 'react-router-dom';
 import Button from '../components/Button';
+import Model from '../components/Model';
+import ApresentacaoBuscar from '../components/apresentacaoBuscar';
 import VisualizadorFila from '../components/desenho/VisualizadorFila';
 import VisualizadorPilha from '../components/desenho/VisualizadorPilha';
 import VisualizadorLista from '../components/desenho/VisualizadorLista';
@@ -13,6 +15,7 @@ import * as listaServices from '../services/listaservices';
 import * as abbServices from '../services/abbServices';
 import * as avlServices from '../services/avlServices';
 import * as rnServices from '../services/rnServices';
+import { useState } from 'react';
 
 const visualizadormap = {
     'fila': VisualizadorFila,
@@ -74,6 +77,11 @@ export default function Simulacao() {
     let nome = pagina.pathname.split('/').pop();
     let nomeTitulo = estruturasNomes[nome] || nome;
     
+    const [modalListaAberto, setModalListaAberto] = useState(false);
+    const [tipoOperacaoLista, setTipoOperacaoLista] = useState('inicio');
+    const [resultadoBusca, setResultadoBusca] = useState(null);
+    const [modalBuscaAberto, setModalBuscaAberto] = useState(false);
+    
     const Visualizer = visualizadormap[nome];
     const textoAdicionar = rotulosBotoes[nome]?.adicionar || 'Adicionar';
     const textoRemover = rotulosBotoes[nome]?.remover || 'Remover';
@@ -95,6 +103,11 @@ export default function Simulacao() {
 
     const handleSuccess = (data) => {
         console.log('Operação bem-sucedida:', data);
+        // Se for uma busca, armazenar resultado e abrir modal
+        if (tipoOperacaoLista === 'Buscar Elemento') {
+            setResultadoBusca(data);
+            setModalBuscaAberto(true);
+        }
         // O visualizador recarrega automaticamente via useEffect
     };
 
@@ -122,35 +135,132 @@ export default function Simulacao() {
                     Operações
                 </h2>
                 <div className='text-xl border-4 border-azul rounded-2xl w-full h-auto min-h-60 flex flex-col p-2 gap-2'>
-                    <Button acao="Adicionar" onSuccess={handleSuccess}>
-                        <p>{textoAdicionar}</p>
-                    </Button>
-                    
-                    <Button acao="Remover" onSuccess={handleSuccess}>
-                        <p>{textoRemover}</p>
-                    </Button>
-                    
-                    {textoBuscar && (
-                        <Button acao="Buscar" onSuccess={handleSuccess}>
-                            <p>{textoBuscar}</p>
-                        </Button>
+                    {nome === 'lista-encadeada' ? (
+                        <>
+                            <button 
+                                onClick={() => {
+                                    setTipoOperacaoLista('Adicionar no Início');
+                                    setModalListaAberto(true);
+                                }} 
+                                className='border-2 rounded-2xl flex justify-center items-center text-xl font-medium text-amarelo p-2 bg-[rgba(0,0,0,0.2)] cursor-pointer hover:bg-amarelo/20 transition-colors'
+                            >
+                                <p>Adicionar no Início</p>
+                            </button>
+                            <button 
+                                onClick={() => {
+                                    setTipoOperacaoLista('Adicionar no Meio');
+                                    setModalListaAberto(true);
+                                }} 
+                                className='border-2 rounded-2xl flex justify-center items-center text-xl font-medium text-amarelo p-2 bg-[rgba(0,0,0,0.2)] cursor-pointer hover:bg-amarelo/20 transition-colors'
+                            >
+                                <p>Adicionar no Meio</p>
+                            </button>
+                            <button 
+                                onClick={() => {
+                                    setTipoOperacaoLista('Adicionar no Fim');
+                                    setModalListaAberto(true);
+                                }} 
+                                className='border-2 rounded-2xl flex justify-center items-center text-xl font-medium text-amarelo p-2 bg-[rgba(0,0,0,0.2)] cursor-pointer hover:bg-amarelo/20 transition-colors'
+                            >
+                                <p>Adicionar no Fim</p>
+                            </button>
+                            <button 
+                                onClick={() => {
+                                    setTipoOperacaoLista('Adicionar Ordenado');
+                                    setModalListaAberto(true);
+                                }} 
+                                className='border-2 rounded-2xl flex justify-center items-center text-xl font-medium text-amarelo p-2 bg-[rgba(0,0,0,0.2)] cursor-pointer hover:bg-amarelo/20 transition-colors'
+                            >
+                                <p>Adicionar Ordenado</p>
+                            </button>
+                            <button 
+                                onClick={() => {
+                                    setTipoOperacaoLista('Remover por Valor');
+                                    setModalListaAberto(true);
+                                }} 
+                                className='border-2 rounded-2xl flex justify-center items-center text-xl font-medium text-amarelo p-2 bg-[rgba(0,0,0,0.2)] cursor-pointer hover:bg-amarelo/20 transition-colors'
+                            >
+                                <p>Remover por Valor</p>
+                            </button>
+                            <button 
+                                onClick={() => {
+                                    setTipoOperacaoLista('Remover por Posição');
+                                    setModalListaAberto(true);
+                                }} 
+                                className='border-2 rounded-2xl flex justify-center items-center text-xl font-medium text-amarelo p-2 bg-[rgba(0,0,0,0.2)] cursor-pointer hover:bg-amarelo/20 transition-colors'
+                            >
+                                <p>Remover por Posição</p>
+                            </button>
+                            <button 
+                                onClick={() => {
+                                    setTipoOperacaoLista('Buscar Elemento');
+                                    setModalListaAberto(true);
+                                }} 
+                                className='border-2 rounded-2xl flex justify-center items-center text-xl font-medium text-amarelo p-2 bg-[rgba(0,0,0,0.2)] cursor-pointer hover:bg-amarelo/20 transition-colors'
+                            >
+                                <p>Buscar Elemento</p>
+                            </button>
+                            <button 
+                                onClick={() => handleUndoRedo('Refazer')} 
+                                className='border-2 rounded-2xl flex justify-center items-center text-xl font-medium text-amarelo p-2 bg-[rgba(0,0,0,0.2)] cursor-pointer hover:bg-amarelo/20 transition-colors'
+                            >
+                                <p>Refazer</p>
+                            </button>
+                            <button 
+                                onClick={() => handleUndoRedo('Desfazer')} 
+                                className='border-2 rounded-2xl flex justify-center items-center text-xl font-medium text-amarelo p-2 bg-[rgba(0,0,0,0.2)] cursor-pointer hover:bg-amarelo/20 transition-colors'
+                            >
+                                <p>Desfazer</p>
+                            </button>
+                        </>
+                    ) : (
+                        <>
+                            <Button acao="Adicionar" onSuccess={handleSuccess}>
+                                <p>{textoAdicionar}</p>
+                            </Button>
+                            
+                            <Button acao="Remover" onSuccess={handleSuccess}>
+                                <p>{textoRemover}</p>
+                            </Button>
+                            
+                            {textoBuscar && (
+                                <Button acao="Buscar" onSuccess={handleSuccess}>
+                                    <p>{textoBuscar}</p>
+                                </Button>
+                            )}
+                            
+                            <button 
+                                onClick={() => handleUndoRedo('Refazer')} 
+                                className='border-2 rounded-2xl flex justify-center items-center text-xl font-medium text-amarelo p-2 bg-[rgba(0,0,0,0.2)] cursor-pointer'
+                            >
+                                <p>Refazer</p>
+                            </button>
+                            <button 
+                                onClick={() => handleUndoRedo('Desfazer')} 
+                                className='border-2 rounded-2xl flex justify-center items-center text-xl font-medium text-amarelo p-2 bg-[rgba(0,0,0,0.2)] cursor-pointer'
+                            >
+                                <p>Desfazer</p>
+                            </button>
+                        </>
                     )}
-                    
-                    <button 
-                        onClick={() => handleUndoRedo('Refazer')} 
-                        className='border-2 rounded-2xl flex justify-center items-center text-xl font-medium text-amarelo p-2 bg-[rgba(0,0,0,0.2)] cursor-pointer'
-                    >
-                        <p>Refazer</p>
-                    </button>
-                    <button 
-                        onClick={() => handleUndoRedo('Desfazer')} 
-                        className='border-2 rounded-2xl flex justify-center items-center text-xl font-medium text-amarelo p-2 bg-[rgba(0,0,0,0.2)] cursor-pointer'
-                    >
-                        <p>Desfazer</p>
-                    </button>
                 </div>
             </div>
         </div>
+        {nome === 'lista-encadeada' && (
+            <Model 
+                estado={modalListaAberto}
+                funcao={setModalListaAberto}
+                acao={tipoOperacaoLista}
+                onSuccess={handleSuccess}
+            />
+        )}
+        {nome === 'lista-encadeada' && (
+            <ApresentacaoBuscar 
+                estado={modalBuscaAberto}
+                funcao={setModalBuscaAberto}
+                resultado={resultadoBusca}
+            />
+        )}
         </>
     )
 }

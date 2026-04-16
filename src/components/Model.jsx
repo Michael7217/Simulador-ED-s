@@ -17,9 +17,13 @@ const serviceMap = {
         'Remover': pilhaServices.removerPilha,
     },
     'lista-encadeada': {
-        'Adicionar': listaServices.adicionarListaOrdenado,
-        'Remover': listaServices.removerListaOrdenado,
-        'Buscar': listaServices.buscarLista, // Adicionado
+        'Adicionar no Início': listaServices.adicionarListaInicio,
+        'Adicionar no Meio': listaServices.adicionarListaMeio,
+        'Adicionar no Fim': listaServices.adicionarListaFim,
+        'Adicionar Ordenado': listaServices.adicionarListaOrdenado,
+        'Remover por Valor': listaServices.removerListaOrdenado,
+        'Remover por Posição': listaServices.removerListaPosicao,
+        'Buscar Elemento': listaServices.BuscarLista,
     },
     'arvore-binaria': {
         'Adicionar': abbServices.inserirAbb,
@@ -40,6 +44,7 @@ const serviceMap = {
 
 export default function Model(props){
     const [valor, setValor] = useState('')
+    const [posicao, setPosicao] = useState('')
     const [loading, setLoading] = useState(false)
     const location = useLocation()
     const estrutura = location.pathname.split('/').pop()
@@ -47,48 +52,82 @@ export default function Model(props){
     const handleClose = useCallback(() => props.funcao(false), [props]);
 
     const needsInput = !(props.acao === 'Remover' && (estrutura === 'fila' || estrutura === 'pilha'));
+    const needsPosicaoComValor = props.acao === 'Adicionar no Meio';
+    const needsPosicaoSomente = props.acao === 'Remover por Posição';
 
     const enviarForm = useCallback(async (e) => {
         e.preventDefault();
-        if (needsInput && !valor) return;
+        if (needsInput && !needsPosicaoComValor && !needsPosicaoSomente && !valor) return;
+        if (needsPosicaoComValor && !valor) return;
+        if (needsPosicaoComValor && !posicao) return;
+        if (needsPosicaoSomente && !posicao) return;
 
         setLoading(true);
         try {
-            const serviceFunction = serviceMap[estrutura]?.[props.acao];
-            
-            if (!serviceFunction) {
-                throw new Error(`Serviço não encontrado para ${estrutura} - ${props.acao}`);
-            }
-
             let response;
-            if (props.acao === 'Remover' && (estrutura === 'fila' || estrutura === 'pilha')) {
-                response = await serviceFunction();
+            
+            if (props.acao === 'Adicionar no Meio') {
+                // Especial para "Adicionar no Meio" - passa valor E posição
+                response = await listaServices.adicionarListaMeio(Number(valor), Number(posicao));
+            } else if (props.acao === 'Remover por Posição') {
+                // Remover por Posição - usa o valor como posição
+                response = await listaServices.removerListaPosicao(Number(posicao));
             } else {
-                response = await serviceFunction(Number(valor));
+                const serviceFunction = serviceMap[estrutura]?.[props.acao];
+                
+                if (!serviceFunction) {
+                    throw new Error(`Serviço não encontrado para ${estrutura} - ${props.acao}`);
+                }
+
+                if (props.acao === 'Remover' && (estrutura === 'fila' || estrutura === 'pilha')) {
+                    response = await serviceFunction();
+                } else {
+                    response = await serviceFunction(Number(valor));
+                }
             }
             
             props.onSuccess?.(response.data);
             props.funcao(false);
             setValor('');
+            setPosicao('');
         } catch (error) {
             console.error('Erro ao enviar:', error);
-            props.onError?.(error);
+            
+            // Tratamento especial para buscas que não encontram elementos
+            if (props.acao === 'Buscar Elemento' && error.response?.status === 404) {
+                // Elemento não encontrado - ainda assim exibir resultado
+                props.onSuccess?.({
+                    encontrado: false,
+                    valor: Number(valor),
+                    antecessor: null,
+                    sucessor: null
+                });
+                props.funcao(false);
+                setValor('');
+                setPosicao('');
+            } else {
+                props.onError?.(error);
+            }
         } finally {
             setLoading(false);
         }
-    }, [valor, props, estrutura, needsInput]);
+    }, [valor, posicao, props, estrutura, needsInput, needsPosicaoComValor, needsPosicaoSomente]);
 
     const ref = useRef(null);
     const buttonRef = useRef(null);
     useEffect(() => {
         if (props.estado) {
-            if (needsInput && ref.current) {
+            if ((needsInput && !needsPosicaoComValor && !needsPosicaoSomente) && ref.current) {
                 ref.current.focus();
-            } else if (!needsInput && buttonRef.current) {
+            } else if ((needsPosicaoComValor) && ref.current) {
+                ref.current.focus();
+            } else if (needsPosicaoSomente && ref.current) {
+                ref.current.focus();
+            } else if (buttonRef.current && !needsInput) {
                 buttonRef.current.focus();
             }
         }
-    }, [props.estado, needsInput])
+    }, [props.estado, needsInput, needsPosicaoComValor, needsPosicaoSomente])
 
     return(
         <>
@@ -103,7 +142,7 @@ export default function Model(props){
                     <h1>{props.acao}</h1>
                 </div>
                 <p className='text-[10px] text-ciano text-center'>para cancelar a ação pressione esc ou clique em qualquer lugar</p>
-                {needsInput && (
+                {needsInput && !needsPosicaoComValor && !needsPosicaoSomente && (
                     <div className="w-full">
                         {props.estado && (
                         <input 
@@ -114,6 +153,45 @@ export default function Model(props){
                             name="numero" 
                             id="1" 
                             placeholder='digite um número' 
+                            className='border-2 rounded-xl border-ciano h-10 w-full px-4 text-center text-azul bg-branco focus:outline-none focus:border-amarelo'
+                            required
+                        />)}
+                    </div>
+                )}
+                {needsPosicaoComValor && (
+                    <div className="w-full flex flex-col gap-3">
+                        {props.estado && (
+                            <>
+                                <input 
+                                    value={valor} 
+                                    onChange={(e) => setValor(e.target.value)}
+                                    ref={ref}
+                                    type="number" 
+                                    placeholder='valor' 
+                                    className='border-2 rounded-xl border-ciano h-10 w-full px-4 text-center text-azul bg-branco focus:outline-none focus:border-amarelo'
+                                    required
+                                />
+                                <input 
+                                    value={posicao} 
+                                    onChange={(e) => setPosicao(e.target.value)}
+                                    type="number" 
+                                    placeholder='posição' 
+                                    className='border-2 rounded-xl border-ciano h-10 w-full px-4 text-center text-azul bg-branco focus:outline-none focus:border-amarelo'
+                                    required
+                                />
+                            </>
+                        )}
+                    </div>
+                )}
+                {needsPosicaoSomente && (
+                    <div className="w-full">
+                        {props.estado && (
+                        <input 
+                            value={posicao} 
+                            onChange={(e) => setPosicao(e.target.value)}
+                            ref={ref}
+                            type="number" 
+                            placeholder='posição' 
                             className='border-2 rounded-xl border-ciano h-10 w-full px-4 text-center text-azul bg-branco focus:outline-none focus:border-amarelo'
                             required
                         />)}

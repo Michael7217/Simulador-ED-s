@@ -2,7 +2,9 @@ import { useState, useRef, useEffect } from 'react';
 import { Layer, Rect, Text, Arrow, Group, Line } from 'react-konva';
 import {
   visualizarLista,
-  adicionarLista,
+  adicionarListaInicio,
+  adicionarListaMeio,
+  adicionarListaFim,
   adicionarListaOrdenado,
   removerListaPosicao,
   removerListaOrdenado,
@@ -116,15 +118,33 @@ export default function ListaVisualizer({ onAcoes }) {
         const val = parseInt(valor);
         if (isNaN(val)) return avisar('Valor inválido!', '#ff4466');
         try {
-          if (pos === '' || pos === undefined || pos === null) {
+          if (pos === 'inicio') {
+            await adicionarListaInicio(val);
+            avisar(`Inserido ${val} no início`);
+          } else if (pos === 'meio') {
+            await adicionarListaMeio(val);
+            avisar(`Inserido ${val} no meio`);
+          } else if (pos === 'fim') {
+            await adicionarListaFim(val);
+            avisar(`Inserido ${val} no fim`);
+          } else if (pos === '' || pos === undefined || pos === null) {
             await adicionarListaOrdenado(val);
             avisar(`Inserido ${val} (ordenado)`);
           } else {
             const p = parseInt(pos);
             if (isNaN(p) || p < 0 || p > lista.length)
               return avisar(`Posição inválida (0–${lista.length})`, '#ff4466');
-            await adicionarLista(val, p);
-            avisar(`Inserido ${val} na pos. ${p}`);
+            const posicaoMeio = Math.floor(lista.length / 2);
+            if (p === 0) {
+              await adicionarListaInicio(val);
+              avisar(`Inserido ${val} no início`);
+            } else if (p === lista.length) {
+              await adicionarListaFim(val);
+              avisar(`Inserido ${val} no fim`);
+            } else if (p === posicaoMeio) {
+              await adicionarListaMeio(val);
+              avisar(`Inserido ${val} no meio`);
+            }
           }
           setTimeout(() => carregar(), 300);
         } catch { avisar('Erro ao inserir!', '#ff4466'); }

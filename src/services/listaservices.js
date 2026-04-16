@@ -1,12 +1,18 @@
 import Api from "./api";
 import { SessionId } from "../utils/sessionId";
 
-export const adicionarLista = (valor, pos) => {
-    return Api.post(`/api/lista/add?valor=${valor}&pos=${pos}`);
-}
-
 export const adicionarListaOrdenado = (valor) => {
     return Api.post(`/api/lista/add-ordenado/${valor}`);
+}
+
+export const adicionarListaInicio = (valor) => {
+    return Api.post(`/api/lista/add-inicio/${valor}`);
+}
+export const adicionarListaMeio = (valor, posicao) => {
+    return Api.post(`/api/lista/add-meio/${valor}/${posicao}`);
+}
+export const adicionarListaFim = (valor) => {
+    return Api.post(`/api/lista/add-fim/${valor}`);
 }
 
 export const removerListaPosicao = (pos) => {
@@ -18,7 +24,11 @@ export const removerListaOrdenado = (valor) => {
 }
 
 export const visualizarLista = () => {
-    return Api.get(`/api/lista?sessionId=${SessionId()}`);
+    return Api.get(`/api/lista`);
+}
+
+export const BuscarLista = (valor) => {
+    return Api.get(`/api/lista/buscar/${valor}`);
 }
 
 export const buscarLista = (valor) => {
