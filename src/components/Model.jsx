@@ -19,18 +19,22 @@ const serviceMap = {
     'lista-encadeada': {
         'Adicionar': listaServices.adicionarListaOrdenado,
         'Remover': listaServices.removerListaOrdenado,
+        'Buscar': listaServices.buscarLista, // Adicionado
     },
     'arvore-binaria': {
         'Adicionar': abbServices.inserirAbb,
         'Remover': abbServices.removerAbb,
+        'Buscar': abbServices.buscarAbb, // Adicionado
     },
     'arvore-avl': {
         'Adicionar': avlServices.inserirAvl,
         'Remover': avlServices.removerAvl,
+        'Buscar': avlServices.buscarAvl, // Adicionado
     },
     'arvore-rubro-negra': {
         'Adicionar': rnServices.inserirRn,
         'Remover': rnServices.removerRn,
+        'Buscar': rnServices.buscarRn, // Adicionado
     },
 };
 

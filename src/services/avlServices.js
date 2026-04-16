@@ -18,6 +18,10 @@ export const visualizarBalsAvl = () => {
     return Api.get(('/api/avl/balanceamento'));
 }
 
+export const buscarAvl = (valor) => {
+    return Api.get(`/api/avl/buscar/${valor}`);
+}
+
 export const refazerAvl = () => {
     return Api.post('/api/avl/refazer');
 }

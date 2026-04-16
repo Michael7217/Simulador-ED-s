@@ -60,21 +60,24 @@ const estruturasNomes = {
     'arvore-rubro-negra': 'Árvore Rubro-Negra',
 };
 
+const rotulosBotoes = {
+    'fila': { adicionar: 'Enfileirar', remover: 'Desenfileirar' },
+    'pilha': { adicionar: 'Empilhar', remover: 'Desempilhar' },
+    'lista-encadeada': { adicionar: 'Adicionar', remover: 'Remover', buscar: 'Buscar' },
+    'arvore-binaria': { adicionar: 'Inserir', remover: 'Remover', buscar: 'Buscar' },
+    'arvore-avl': { adicionar: 'Inserir', remover: 'Remover', buscar: 'Buscar' },
+    'arvore-rubro-negra': { adicionar: 'Inserir', remover: 'Remover', buscar: 'Buscar' },
+};
 
-export default function Simulacao(){
+export default function Simulacao() {
     const pagina = useLocation();
     let nome = pagina.pathname.split('/').pop();
     let nomeTitulo = estruturasNomes[nome] || nome;
-
     
     const Visualizer = visualizadormap[nome];
-    
-    const acoes = [
-        'Adicionar',
-        'Remover',
-        'Refazer',
-        'Desfazer'
-    ];
+    const textoAdicionar = rotulosBotoes[nome]?.adicionar || 'Adicionar';
+    const textoRemover = rotulosBotoes[nome]?.remover || 'Remover';
+    const textoBuscar = rotulosBotoes[nome]?.buscar;
 
     const handleUndoRedo = async (acao) => {
         try {
@@ -119,23 +122,31 @@ export default function Simulacao(){
                     Operações
                 </h2>
                 <div className='text-xl border-4 border-azul rounded-2xl w-full h-auto min-h-60 flex flex-col p-2 gap-2'>
-                    <Button acao={acoes[0]} onSuccess={handleSuccess}>
-                        <p>{acoes[0]}</p>
+                    <Button acao="Adicionar" onSuccess={handleSuccess}>
+                        <p>{textoAdicionar}</p>
                     </Button>
-                    <Button acao={acoes[1]} onSuccess={handleSuccess}>
-                        <p>{acoes[1]}</p>
+                    
+                    <Button acao="Remover" onSuccess={handleSuccess}>
+                        <p>{textoRemover}</p>
                     </Button>
+                    
+                    {textoBuscar && (
+                        <Button acao="Buscar" onSuccess={handleSuccess}>
+                            <p>{textoBuscar}</p>
+                        </Button>
+                    )}
+                    
                     <button 
-                        onClick={() => handleUndoRedo(acoes[2])} 
+                        onClick={() => handleUndoRedo('Refazer')} 
                         className='border-2 rounded-2xl flex justify-center items-center text-xl font-medium text-amarelo p-2 bg-[rgba(0,0,0,0.2)] cursor-pointer'
                     >
-                        <p>{acoes[2]}</p>
+                        <p>Refazer</p>
                     </button>
                     <button 
-                        onClick={() => handleUndoRedo(acoes[3])} 
+                        onClick={() => handleUndoRedo('Desfazer')} 
                         className='border-2 rounded-2xl flex justify-center items-center text-xl font-medium text-amarelo p-2 bg-[rgba(0,0,0,0.2)] cursor-pointer'
                     >
-                        <p>{acoes[3]}</p>
+                        <p>Desfazer</p>
                     </button>
                 </div>
             </div>

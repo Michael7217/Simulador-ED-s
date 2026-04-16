@@ -28,6 +28,10 @@ export const visualizarAbb = () => {
     return Api.get((`/api/abb/arvore?sessionId=${SessionId()}`));
 }
 
+export const buscarAbb = (valor) => {
+    return Api.get(`/api/abb/buscar/${valor}`);
+}
+
 export const desfazerAbb = () => {
     return Api.post('/api/abb/desfazer');
 }

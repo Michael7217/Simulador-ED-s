@@ -21,6 +21,10 @@ export const visualizarLista = () => {
     return Api.get(`/api/lista?sessionId=${SessionId()}`);
 }
 
+export const buscarLista = (valor) => {
+    return Api.get(`/api/lista/buscar/${valor}`);
+}
+
 export const desfazerLista = () => {
     return Api.post('/api/lista/desfazer');
 }
