@@ -93,9 +93,7 @@ export default function Model(props){
         } catch (error) {
             console.error('Erro ao enviar:', error);
             
-            // Tratamento especial para buscas que não encontram elementos
-            if (props.acao === 'Buscar Elemento' && error.response?.status === 404) {
-                // Elemento não encontrado - ainda assim exibir resultado
+            if ((props.acao === 'Buscar Elemento' || props.acao === 'Buscar') && error.response?.status === 404) {
                 props.onSuccess?.({
                     encontrado: false,
                     valor: Number(valor),

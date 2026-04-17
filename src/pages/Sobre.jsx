@@ -24,7 +24,7 @@ export default function Sobre() {
                         O <strong>Simulador ED's</strong> é uma plataforma interativa de cunho educacional, criada com o objetivo de facilitar o aprendizado e a compreensão visual das Estruturas de Dados. Acreditamos que a abstração de conceitos como ponteiros, nós e balanceamento de árvores se torna muito mais intuitiva quando o estudante pode acompanhar, na prática, o comportamento da memória.
                     </p>
                     <p>
-                        Por meio de nosso canvas dinâmico, o projeto permite que os usuários realizem operações de inserção, remoção e navegação em tempo real nas estruturas clássicas da computação: Listas Encadeadas, Filas, Pilhas e Árvores (Binária de Busca e AVL). Esta ferramenta foi projetada para preencher a lacuna entre a teoria fundamentada e a prática visual.
+                        Por meio de nosso canvas dinâmico, o projeto permite que os usuários realizem operações de inserção, remoção e navegação em tempo real nas estruturas clássicas da computação: Listas Encadeadas, Filas, Pilhas e Árvores (Binária de Busca, Rubro-Negra e AVL). Esta ferramenta foi projetada para preencher a lacuna entre a teoria fundamentada e a prática visual.
                     </p>
                     
                     <div className="mt-10 bg-ciano/10 p-6 rounded-xl border border-ciano/20">

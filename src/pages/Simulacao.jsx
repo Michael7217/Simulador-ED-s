@@ -103,11 +103,6 @@ export default function Simulacao() {
 
     const handleSuccess = (data) => {
         console.log('Operação bem-sucedida:', data);
-        // Se for uma busca, armazenar resultado e abrir modal
-        if (tipoOperacaoLista === 'Buscar Elemento') {
-            setResultadoBusca(data);
-            setModalBuscaAberto(true);
-        }
         // O visualizador recarrega automaticamente via useEffect
     };
 
@@ -224,20 +219,23 @@ export default function Simulacao() {
                             </Button>
                             
                             {textoBuscar && (
-                                <Button acao="Buscar" onSuccess={handleSuccess}>
+                                <Button acao="Buscar" onSuccess={(data) => {
+                                    setResultadoBusca(data);
+                                    setModalBuscaAberto(true);
+                                }}>
                                     <p>{textoBuscar}</p>
                                 </Button>
                             )}
                             
                             <button 
                                 onClick={() => handleUndoRedo('Refazer')} 
-                                className='border-2 rounded-2xl flex justify-center items-center text-xl font-medium text-amarelo p-2 bg-[rgba(0,0,0,0.2)] cursor-pointer'
+                                className='border-2 rounded-2xl flex justify-center items-center text-xl font-medium text-amarelo p-2 bg-[rgba(0,0,0,0.2)] cursor-pointer hover:bg-amarelo/20 transition-colors'
                             >
                                 <p>Refazer</p>
                             </button>
                             <button 
                                 onClick={() => handleUndoRedo('Desfazer')} 
-                                className='border-2 rounded-2xl flex justify-center items-center text-xl font-medium text-amarelo p-2 bg-[rgba(0,0,0,0.2)] cursor-pointer'
+                                className='border-2 rounded-2xl flex justify-center items-center text-xl font-medium text-amarelo p-2 bg-[rgba(0,0,0,0.2)] cursor-pointer hover:bg-amarelo/20 transition-colors'
                             >
                                 <p>Desfazer</p>
                             </button>
@@ -251,16 +249,21 @@ export default function Simulacao() {
                 estado={modalListaAberto}
                 funcao={setModalListaAberto}
                 acao={tipoOperacaoLista}
-                onSuccess={handleSuccess}
+                onSuccess={(data) => {
+                    if (tipoOperacaoLista === 'Buscar Elemento') {
+                        setResultadoBusca(data);
+                        setModalBuscaAberto(true);
+                    } else {
+                        handleSuccess(data);
+                    }
+                }}
             />
         )}
-        {nome === 'lista-encadeada' && (
-            <ApresentacaoBuscar 
-                estado={modalBuscaAberto}
-                funcao={setModalBuscaAberto}
-                resultado={resultadoBusca}
-            />
-        )}
+        <ApresentacaoBuscar 
+            estado={modalBuscaAberto}
+            funcao={setModalBuscaAberto}
+            resultado={resultadoBusca}
+        />
         </>
     )
 }

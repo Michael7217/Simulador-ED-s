@@ -4,10 +4,7 @@ export default function ApresentacaoBuscar(props){
     const handleClose = () => props.funcao?.(false);
     
     const resultado = props.resultado;
-    // Se encontrado for explicitamente false, não encontrado
-    // Se encontrado for true ou tiver antecessor/sucessor, encontrado
-    const encontrado = resultado?.encontrado === true || 
-                       (resultado?.encontrado !== false && resultado?.antecessor !== undefined);
+    const encontrado = resultado && resultado?.encontrado !== false && resultado?.valor !== undefined;
     
     return(
         <>
@@ -26,19 +23,63 @@ export default function ApresentacaoBuscar(props){
                 {encontrado ? (
                     <div className='flex flex-col gap-3 text-branco'>
                         <h2 className='text-2xl font-bold text-amarelo text-center mb-2'>✓ Elemento Encontrado!</h2>
-                        <div className='flex flex-col gap-2 text-lg font-medium'>
+                        <div className='flex flex-col gap-2 text-lg font-medium'> 
                             <div className='flex justify-between border-b border-ciano/30 pb-2'>
                                 <span className='text-ciano'>Valor:</span>
                                 <span className='font-bold text-amarelo'>{resultado?.valor}</span>
                             </div>
-                            <div className='flex justify-between border-b border-ciano/30 pb-2'>
-                                <span className='text-ciano'>Antecessor:</span>
-                                <span className='font-bold text-amarelo'>{resultado?.antecessor !== null && resultado?.antecessor !== undefined ? resultado.antecessor : 'NULL'}</span>
-                            </div>
-                            <div className='flex justify-between border-b border-ciano/30 pb-2'>
-                                <span className='text-ciano'>Sucessor:</span>
-                                <span className='font-bold text-amarelo'>{resultado?.sucessor !== null && resultado?.sucessor !== undefined ? resultado.sucessor : 'NULL'}</span>
-                            </div>
+
+                            {resultado?.antecessor !== undefined && (
+                                <div className='flex justify-between border-b border-ciano/30 pb-2'>
+                                    <span className='text-ciano'>Antecessor:</span>
+                                    <span className='font-bold text-amarelo'>{resultado?.antecessor !== null ? resultado.antecessor : 'NULL'}</span>
+                                </div>
+                            )}
+                            {resultado?.sucessor !== undefined && (
+                                <div className='flex justify-between border-b border-ciano/30 pb-2'>
+                                    <span className='text-ciano'>Sucessor:</span>
+                                    <span className='font-bold text-amarelo'>{resultado?.sucessor !== null ? resultado.sucessor : 'NULL'}</span>
+                                </div>
+                            )}
+
+                            {resultado?.pai !== undefined && (
+                                <div className='flex justify-between border-b border-ciano/30 pb-2'>
+                                    <span className='text-ciano'>Pai:</span>
+                                    <span className='font-bold text-amarelo'>{resultado?.pai !== null ? resultado.pai : 'NULL'}</span>
+                                </div>
+                            )}
+                            {resultado?.esq !== undefined && (
+                                <div className='flex justify-between border-b border-ciano/30 pb-2'>
+                                    <span className='text-ciano'>Esquerda:</span>
+                                    <span className='font-bold text-amarelo'>{resultado?.esq !== null ? resultado.esq : 'NULL'}</span>
+                                </div>
+                            )}
+                            {resultado?.dir !== undefined && (
+                                <div className='flex justify-between border-b border-ciano/30 pb-2'>
+                                    <span className='text-ciano'>Direita:</span>
+                                    <span className='font-bold text-amarelo'>{resultado?.dir !== null ? resultado.dir : 'NULL'}</span>
+                                </div>
+                            )}
+                            {resultado?.cor !== undefined && (
+                                <div className='flex justify-between border-b border-ciano/30 pb-2 items-center'>
+                                    <span className='text-ciano'>Cor:</span>
+                                    <span className={`font-bold px-2 py-0.5 rounded text-sm ${resultado.cor === 'Rubro' ? 'text-white bg-red-600' : 'text-white bg-slate-800'}`}>
+                                        {resultado.cor}
+                                    </span>
+                                </div>
+                            )}
+                            {resultado?.bal !== undefined && (
+                                <div className='flex justify-between border-b border-ciano/30 pb-2'>
+                                    <span className='text-ciano'>Balanceamento (AVL):</span>
+                                    <span className='font-bold text-amarelo'>{resultado.bal}</span>
+                                </div>
+                            )}
+                            {resultado?.altura !== undefined && (
+                                <div className='flex justify-between border-b border-ciano/30 pb-2'>
+                                    <span className='text-ciano'>Altura:</span>
+                                    <span className='font-bold text-amarelo'>{resultado.altura}</span>
+                                </div>
+                            )}
                         </div>
                     </div>
                 ) : (
