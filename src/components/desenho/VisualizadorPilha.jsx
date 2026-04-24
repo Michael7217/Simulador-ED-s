@@ -1,15 +1,67 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { Layer, Rect, Text, Arrow, Group } from 'react-konva';
+import Konva from 'konva';
 import { visualizarPilha, inserirPilha, removerPilha } from '../../services/pilhaServices';
 import PalcoZoom from './PalcoZoom';
 
-const LARGURA_NO = 150;
-const ALTURA_NO  = 48;
-const ESPACO_NO  = 5;
+const LARGURA_NO        = 150;
+const ALTURA_NO         = 48;
+const ESPACO_NO         = 5;
+const DURACAO_ANIM      = 0.55; // segundos — mais lenta para o usuário acompanhar
 
-function NoPilha({ x, y, valor, indice, ehTopo }) {
+// ─── Nó animado ─────────────────────────────────────────────────────────────
+function NoPilha({ x, y, valor, indice, ehTopo, estado }) {
+  const ref = useRef();
+
+  // Animação de entrada (empilhar): cai de cima
+  useEffect(() => {
+    if (!ref.current) return;
+    if (estado === 'novo') {
+      ref.current.opacity(0);
+      ref.current.y(y - 60);
+      ref.current.scaleX(0.7);
+      ref.current.scaleY(0.7);
+      new Konva.Tween({
+        node: ref.current,
+        duration: DURACAO_ANIM,
+        opacity: 1,
+        y,
+        scaleX: 1,
+        scaleY: 1,
+        easing: Konva.Easings.EaseOut,
+      }).play();
+    }
+  }, [estado]);
+
+  // Animação de saída (desempilhar): sobe e some
+  useEffect(() => {
+    if (!ref.current) return;
+    if (estado === 'removendo') {
+      new Konva.Tween({
+        node: ref.current,
+        duration: DURACAO_ANIM,
+        opacity: 0,
+        y: y - 70,
+        scaleX: 0.6,
+        scaleY: 0.6,
+        easing: Konva.Easings.EaseIn,
+      }).play();
+    }
+  }, [estado]);
+
+  // Movimento suave ao mudar de posição (ex: reordenação)
+  useEffect(() => {
+    if (!ref.current || estado === 'novo' || estado === 'removendo') return;
+    new Konva.Tween({
+      node: ref.current,
+      duration: DURACAO_ANIM * 0.8,
+      y,
+      easing: Konva.Easings.EaseInOut,
+    }).play();
+  }, [y, estado]);
+
   return (
-    <Group x={x} y={y}>
+    <Group ref={ref} x={x} y={y}>
       {ehTopo && (
         <Rect x={-4} y={-4} width={LARGURA_NO + 8} height={ALTURA_NO + 8} cornerRadius={9}
           fill='transparent' stroke='#a78bfa' strokeWidth={2} opacity={0.5}
@@ -32,25 +84,33 @@ function NoPilha({ x, y, valor, indice, ehTopo }) {
   );
 }
 
+// ─── Componente principal ────────────────────────────────────────────────────
 export default function PilhaVisualizer({ onAcoes }) {
-  const [pilha, setPilha]       = useState([]);
-  const [mensagem, setMensagem] = useState(null);
-  const refContainer            = useRef(null);
-  const [largura, setLargura]   = useState(400);
-  const [altura, setAltura]     = useState(500);
+  const [pilha, setPilha]               = useState([]);
+  const [nosRenderizados, setNosRend]   = useState([]);
+  const [nosNovos, setNosNovos]         = useState(new Set());
+  const [nosRemovendo, setNosRemov]     = useState(new Set());
+  const [mensagem, setMensagem]         = useState(null);
+  const refContainer                    = useRef(null);
+  const [largura, setLargura]           = useState(400);
+  const [altura, setAltura]             = useState(500);
+  // Evita recarregar durante animação de remoção
+  const animandoRef                     = useRef(false);
 
-  const carregar = async () => {
+  const carregar = useCallback(async () => {
+    if (animandoRef.current) return;
     try { const r = await visualizarPilha(); setPilha(r.data || []); }
     catch { setPilha([]); }
-  };
+  }, []);
 
   useEffect(() => { carregar(); }, []);
 
   useEffect(() => {
-    const interval = setInterval(() => carregar(), 2000);
-    return () => clearInterval(interval);
-  }, []);
+    const id = setInterval(carregar, 2000);
+    return () => clearInterval(id);
+  }, [carregar]);
 
+  // Responsividade
   useEffect(() => {
     const atualizar = () => {
       if (refContainer.current) {
@@ -63,6 +123,38 @@ export default function PilhaVisualizer({ onAcoes }) {
     if (refContainer.current) obs.observe(refContainer.current);
     return () => obs.disconnect();
   }, []);
+
+  // Diff de nós → animar inserção/remoção
+  useEffect(() => {
+    const novosIds   = new Set(pilha.map((_, i) => `${pilha[i]}_${i}`));
+    const antigosIds = new Set(nosRenderizados.map((n) => `${n.valor}_${n.indice}`));
+
+    // Valores que saíram (topo — índice 0)
+    const removidos = nosRenderizados.filter(
+      (n) => !pilha.some((v, i) => `${v}_${i}` === `${n.valor}_${n.indice}`)
+    );
+    // Valores que entraram
+    const inseridos = pilha
+      .map((v, i) => `${v}_${i}`)
+      .filter((id) => !antigosIds.has(id));
+
+    if (removidos.length) {
+      animandoRef.current = true;
+      setNosRemov(new Set(removidos.map((n) => `${n.valor}_${n.indice}`)));
+      setTimeout(() => {
+        animandoRef.current = false;
+        setNosRend(pilha.map((v, i) => ({ valor: v, indice: i })));
+        setNosRemov(new Set());
+      }, DURACAO_ANIM * 1000 + 100);
+    } else {
+      setNosRend(pilha.map((v, i) => ({ valor: v, indice: i })));
+    }
+
+    if (inseridos.length) {
+      setNosNovos(new Set(inseridos));
+      setTimeout(() => setNosNovos(new Set()), DURACAO_ANIM * 1000 + 100);
+    }
+  }, [pilha]);
 
   const avisar = (texto, cor = '#00e676') => {
     setMensagem({ texto, cor });
@@ -88,17 +180,12 @@ export default function PilhaVisualizer({ onAcoes }) {
   const xNo   = (largura - LARGURA_NO) / 2;
   const baseY = altura - 60;
 
-  // ── CORREÇÃO: índice 0 = topo → deve ficar no ponto mais alto ──
-  // y(i) = baseY - (n - i) * passo
-  //   i=0          → baseY - n*passo   (mais alto, topo)
-  //   i=last       → baseY - 1*passo   (mais baixo, base)
-  const topoY = pilha.length > 0
-    ? baseY - pilha.length * (ALTURA_NO + ESPACO_NO)
+  const topoY = nosRenderizados.length > 0
+    ? baseY - nosRenderizados.length * (ALTURA_NO + ESPACO_NO)
     : null;
-
-  const setaY       = topoY !== null ? topoY + ALTURA_NO / 2 : 0;
-  const setaXFim    = xNo - 8;
-  const setaXInicio = xNo - 62;
+  const setaY        = topoY !== null ? topoY + ALTURA_NO / 2 : 0;
+  const setaXFim     = xNo - 8;
+  const setaXInicio  = xNo - 62;
 
   return (
     <div ref={refContainer} className='relative w-full h-full'>
@@ -109,7 +196,6 @@ export default function PilhaVisualizer({ onAcoes }) {
         </div>
       )}
 
-      {/* Info fixa — topo agora é pilha[0] */}
       <div className='absolute top-3 left-4 flex gap-3 text-[10px] font-mono text-green-600 pointer-events-none z-10 font-semibold'>
         <span>LIFO</span>
         <span>tamanho: <b>{pilha.length}</b></span>
@@ -124,40 +210,36 @@ export default function PilhaVisualizer({ onAcoes }) {
           <Rect x={xNo - 12} y={baseY + 12} width={LARGURA_NO + 24} height={7}
             cornerRadius={3} fill='#94a3b8' />
 
-          {/* Estado vazio */}
-          {pilha.length === 0 && (
+          {pilha.length === 0 && nosRenderizados.length === 0 && (
             <Text x={0} y={altura / 2 - 10} width={largura}
               text='Pilha vazia — use o painel para inserir'
               fontSize={12} fontFamily='monospace' fill='#334155' align='center' />
           )}
 
-          {/* ── CORREÇÃO: fórmula invertida ──
-              i=0  (topo)  → posição mais alta
-              i=n-1 (base) → posição mais baixa (junto à base visual) */}
-          {pilha.map((val, i) => {
-            const y      = baseY - (pilha.length - i) * (ALTURA_NO + ESPACO_NO);
+          {nosRenderizados.map((n) => {
+            const id     = `${n.valor}_${n.indice}`;
+            const i      = n.indice;
+            const y      = baseY - (nosRenderizados.length - i) * (ALTURA_NO + ESPACO_NO);
             const ehTopo = i === 0;
+            let estado   = 'normal';
+            if (nosNovos.has(id))     estado = 'novo';
+            if (nosRemovendo.has(id))  estado = 'removendo';
             return (
-              <NoPilha key={i} x={xNo} y={y} valor={val} indice={i} ehTopo={ehTopo} />
+              <NoPilha key={id} x={xNo} y={y}
+                valor={n.valor} indice={i}
+                ehTopo={ehTopo} estado={estado} />
             );
           })}
 
-          {/* Indicador TOPO */}
           {pilha.length > 0 && (
             <>
-              <Text
-                x={setaXInicio}
-                y={setaY - 15}
+              <Text x={setaXInicio} y={setaY - 15}
                 width={setaXFim - setaXInicio}
-                text='TOPO'
-                fontSize={9} fontFamily='monospace' fontStyle='bold'
-                fill='#a78bfa' align='center'
-              />
-              <Arrow
-                points={[setaXInicio, setaY, setaXFim, setaY]}
+                text='TOPO' fontSize={9} fontFamily='monospace' fontStyle='bold'
+                fill='#a78bfa' align='center' />
+              <Arrow points={[setaXInicio, setaY, setaXFim, setaY]}
                 stroke='#a78bfa' strokeWidth={2} fill='#a78bfa'
-                pointerLength={7} pointerWidth={5}
-              />
+                pointerLength={7} pointerWidth={5} />
             </>
           )}
         </Layer>

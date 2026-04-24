@@ -1,19 +1,67 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { Layer, Rect, Text, Arrow, Group } from 'react-konva';
+import Konva from 'konva';
 import { visualizarFila, adicionarFila, removerFila } from '../../services/filaservices';
 import PalcoZoom from './PalcoZoom';
 
-const LARGURA_NO = 82;
-const ALTURA_NO  = 58;
-const ESPACO_NO  = 46;
-const INICIO_X   = 50;
-const INICIO_Y   = 90;
+const LARGURA_NO   = 82;
+const ALTURA_NO    = 58;
+const ESPACO_NO    = 46;
+const INICIO_X     = 50;
+const INICIO_Y     = 90;
+const DURACAO_ANIM = 0.55;
 
-function NoFila({ x, y, valor, indice, ehFrente, ehFundo }) {
+// ─── Nó animado ─────────────────────────────────────────────────────────────
+function NoFila({ x, y, valor, indice, ehFrente, ehFundo, estado }) {
+  const ref    = useRef();
   const especial = ehFrente || ehFundo;
   const cor      = ehFrente ? '#34d399' : ehFundo ? '#38bdf8' : null;
+
+  // Inserção: entra pela direita
+  useEffect(() => {
+    if (!ref.current || estado !== 'novo') return;
+    ref.current.x(x + 100);
+    ref.current.opacity(0);
+    ref.current.scaleX(0.6);
+    ref.current.scaleY(0.6);
+    new Konva.Tween({
+      node: ref.current,
+      duration: DURACAO_ANIM,
+      x,
+      opacity: 1,
+      scaleX: 1,
+      scaleY: 1,
+      easing: Konva.Easings.EaseOut,
+    }).play();
+  }, [estado]);
+
+  // Remoção: sai pela esquerda
+  useEffect(() => {
+    if (!ref.current || estado !== 'removendo') return;
+    new Konva.Tween({
+      node: ref.current,
+      duration: DURACAO_ANIM,
+      x: x - 100,
+      opacity: 0,
+      scaleX: 0.6,
+      scaleY: 0.6,
+      easing: Konva.Easings.EaseIn,
+    }).play();
+  }, [estado]);
+
+  // Movimento suave de posição (fila avança após remoção)
+  useEffect(() => {
+    if (!ref.current || estado === 'novo' || estado === 'removendo') return;
+    new Konva.Tween({
+      node: ref.current,
+      duration: DURACAO_ANIM * 0.9,
+      x,
+      easing: Konva.Easings.EaseInOut,
+    }).play();
+  }, [x, estado]);
+
   return (
-    <Group x={x} y={y}>
+    <Group ref={ref} x={x} y={y}>
       {especial && (
         <Rect x={-3} y={-3} width={LARGURA_NO + 6} height={ALTURA_NO + 6} cornerRadius={9}
           fill='transparent' stroke={cor} strokeWidth={1.5} opacity={0.35}
@@ -33,27 +81,29 @@ function NoFila({ x, y, valor, indice, ehFrente, ehFundo }) {
   );
 }
 
+// ─── Componente principal ────────────────────────────────────────────────────
 export default function FilaVisualizer({ onAcoes }) {
-  const [fila, setFila]           = useState([]);
-  const [mensagem, setMensagem]   = useState(null);
-  const refContainer              = useRef(null);
-  const [largura, setLargura]     = useState(600);
-  const [altura, setAltura]       = useState(300);
+  const [fila, setFila]             = useState([]);
+  const [nosRenderizados, setNosR]  = useState([]);
+  const [nosNovos, setNosNovos]     = useState(new Set());
+  const [nosRemovendo, setNosRemov] = useState(new Set());
+  const [mensagem, setMensagem]     = useState(null);
+  const refContainer                = useRef(null);
+  const [largura, setLargura]       = useState(600);
+  const [altura, setAltura]         = useState(300);
+  const animandoRef                 = useRef(false);
 
-  const carregar = async () => {
+  const carregar = useCallback(async () => {
+    if (animandoRef.current) return;
     try { const r = await visualizarFila(); setFila(r.data || []); }
     catch { setFila([]); }
-  };
+  }, []);
 
   useEffect(() => { carregar(); }, []);
-
-  // Recarrega periodicamente para pegar mudanças
   useEffect(() => {
-    const interval = setInterval(() => {
-      carregar();
-    }, 2000); // Recarrega a cada 2 segundos
-    return () => clearInterval(interval);
-  }, []);
+    const id = setInterval(carregar, 2000);
+    return () => clearInterval(id);
+  }, [carregar]);
 
   useEffect(() => {
     const atualizar = () => {
@@ -73,6 +123,33 @@ export default function FilaVisualizer({ onAcoes }) {
     setTimeout(() => setMensagem(null), 2500);
   };
 
+  // Diff de nós para animações
+  useEffect(() => {
+    const makeId = (v, i) => `${v}_${i}`;
+    const novosIds   = new Set(fila.map((v, i) => makeId(v, i)));
+    const antigosIds = new Set(nosRenderizados.map((n) => makeId(n.valor, n.indice)));
+
+    const removidos = nosRenderizados.filter((n) => !novosIds.has(makeId(n.valor, n.indice)));
+    const inseridos = fila.map((v, i) => makeId(v, i)).filter((id) => !antigosIds.has(id));
+
+    if (removidos.length) {
+      animandoRef.current = true;
+      setNosRemov(new Set(removidos.map((n) => makeId(n.valor, n.indice))));
+      setTimeout(() => {
+        animandoRef.current = false;
+        setNosR(fila.map((v, i) => ({ valor: v, indice: i })));
+        setNosRemov(new Set());
+      }, DURACAO_ANIM * 1000 + 100);
+    } else {
+      setNosR(fila.map((v, i) => ({ valor: v, indice: i })));
+    }
+
+    if (inseridos.length) {
+      setNosNovos(new Set(inseridos));
+      setTimeout(() => setNosNovos(new Set()), DURACAO_ANIM * 1000 + 100);
+    }
+  }, [fila]);
+
   useEffect(() => {
     onAcoes?.({
       inserir: async (valor) => {
@@ -89,7 +166,14 @@ export default function FilaVisualizer({ onAcoes }) {
     });
   }, [fila]);
 
-  const larguraTotal = fila.length * (LARGURA_NO + ESPACO_NO) + 80 + INICIO_X;
+  // Renderiza o estado transitório (inclui nós removendo + novos estado)
+  const todosOsNos = [
+    ...nosRenderizados,
+    // Nós que estão sendo removidos e ainda não estão em nosRenderizados
+    ...nosRenderizados.filter((n) => nosRemovendo.has(`${n.valor}_${n.indice}`)),
+  ];
+
+  const larguraTotal = nosRenderizados.length * (LARGURA_NO + ESPACO_NO) + 80 + INICIO_X;
   const larguraCena  = Math.max(largura, larguraTotal);
 
   return (
@@ -101,7 +185,6 @@ export default function FilaVisualizer({ onAcoes }) {
         </div>
       )}
 
-      {/* Labels direcionais - fixos */}
       <div className='absolute top-3 left-4 right-4 flex justify-between text-[9px] font-mono font-bold pointer-events-none z-10 text-green-600'>
         <span>← DESENFILEIRAR (FRENTE)</span>
         <span>ENFILEIRAR (FUNDO) →</span>
@@ -110,22 +193,31 @@ export default function FilaVisualizer({ onAcoes }) {
       <div style={{ width: '100%', height: '100%', backgroundColor: '#ffffff', overflow: 'hidden' }}>
         <PalcoZoom width={larguraCena} height={altura || 300}>
           <Layer>
-            {/* Fundo branco expandido */}
             <Rect x={-5000} y={-5000} width={larguraCena + 10000} height={(altura || 300) + 10000} fill='#ffffff' />
-            {fila.length === 0 && (
+
+            {nosRenderizados.length === 0 && nosRemovendo.size === 0 && (
               <Text x={0} y={(altura || 300) / 2 - 10} width={larguraCena}
                 text='Fila vazia — use o painel para inserir'
                 fontSize={12} fontFamily='monospace' fill='#334155' align='center' />
             )}
-            {fila.map((val, i) => (
-              <NoFila key={i}
-                x={INICIO_X + i * (LARGURA_NO + ESPACO_NO)} y={INICIO_Y}
-                valor={val} indice={i}
-                ehFrente={i === 0}
-                ehFundo={i === fila.length - 1 && fila.length > 1} />
-            ))}
-            {fila.map((_, i) => {
-              if (i >= fila.length - 1) return null;
+
+            {nosRenderizados.map((n) => {
+              const id      = `${n.valor}_${n.indice}`;
+              const xPos    = INICIO_X + n.indice * (LARGURA_NO + ESPACO_NO);
+              const estado  = nosNovos.has(id) ? 'novo' : nosRemovendo.has(id) ? 'removendo' : 'normal';
+              return (
+                <NoFila key={id}
+                  x={xPos} y={INICIO_Y}
+                  valor={n.valor} indice={n.indice}
+                  ehFrente={n.indice === 0}
+                  ehFundo={n.indice === nosRenderizados.length - 1 && nosRenderizados.length > 1}
+                  estado={estado} />
+              );
+            })}
+
+            {/* Setas entre nós */}
+            {nosRenderizados.map((_, i) => {
+              if (i >= nosRenderizados.length - 1) return null;
               const x1 = INICIO_X + i * (LARGURA_NO + ESPACO_NO) + LARGURA_NO;
               const x2 = INICIO_X + (i + 1) * (LARGURA_NO + ESPACO_NO);
               const y  = INICIO_Y + ALTURA_NO / 2;
@@ -135,16 +227,18 @@ export default function FilaVisualizer({ onAcoes }) {
                   pointerLength={7} pointerWidth={5} />
               );
             })}
+
             {/* Seta entrada (direita) */}
-            {fila.length > 0 && (() => {
-              const rx = INICIO_X + fila.length * (LARGURA_NO + ESPACO_NO) - ESPACO_NO + LARGURA_NO;
+            {nosRenderizados.length > 0 && (() => {
+              const rx = INICIO_X + nosRenderizados.length * (LARGURA_NO + ESPACO_NO) - ESPACO_NO + LARGURA_NO;
               return (
                 <Arrow points={[rx + 8, INICIO_Y + ALTURA_NO / 2, rx + 44, INICIO_Y + ALTURA_NO / 2]}
                   stroke='#38bdf8' strokeWidth={2} fill='#38bdf8' pointerLength={7} pointerWidth={5} />
               );
             })()}
+
             {/* Seta saída (esquerda) */}
-            {fila.length > 0 && (
+            {nosRenderizados.length > 0 && (
               <Arrow points={[INICIO_X - 44, INICIO_Y + ALTURA_NO / 2, INICIO_X - 8, INICIO_Y + ALTURA_NO / 2]}
                 stroke='#34d399' strokeWidth={2} fill='#34d399' pointerLength={7} pointerWidth={5} />
             )}

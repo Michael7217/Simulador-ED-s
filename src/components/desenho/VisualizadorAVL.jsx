@@ -1,15 +1,15 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { Layer, Circle, Text, Line, Group, Rect } from 'react-konva';
+import Konva from 'konva';
 import { inserirAvl, removerAvl, visualizarArvore } from '../../services/avlServices';
 import PalcoZoom from './PalcoZoom';
 
 const RAIO            = 26;
 const ESPACO_VERTICAL = 82;
 const MARGEM          = 50;
+const DURACAO_ANIM    = 0.75; // mais lento para visualizar rotações
 
-// ─── Parse ["Chave: 20 | Equilíbrio: 1", ...] ───────────────────────────────────────
-
-
+// ─── Utilitários de layout ───────────────────────────────────────────────────
 function corBal(b) {
   if (Math.abs(b) <= 1) return '#34d399';
   if (Math.abs(b) === 2) return '#fb923c';
@@ -20,33 +20,102 @@ function profundidade(no) {
   if (!no) return 0;
   return 1 + Math.max(profundidade(no.esq), profundidade(no.dir));
 }
-function posicoes(no, prof, esq, dir, mapa = {}, acc = []) {
+
+// Retorna mapa valor → {x, y} em coordenadas de canvas
+function calcPosicoes(no, prof, esq, dir, larguraDesenho, acc = {}) {
   if (!no) return acc;
-  const valor = no.valor || no.chave;
-  const bal = mapa[valor] !== undefined ? mapa[valor] : null;
-  acc.push({ valor, x: (esq + dir) / 2, prof, bal });
-  posicoes(no.esq, prof + 1, esq, (esq + dir) / 2, mapa, acc);
-  posicoes(no.dir, prof + 1, (esq + dir) / 2, dir, mapa, acc);
-  return acc;
-}
-function arestas(no, prof, esq, dir, acc = []) {
-  if (!no) return acc;
-  const px = (esq + dir) / 2;
-  if (no.esq) {
-    arestas(no.esq, prof + 1, esq, (esq + dir) / 2, acc);
-    acc.push({ px, py: prof, cx: (esq + (esq + dir) / 2) / 2, cy: prof + 1 });
-  }
-  if (no.dir) {
-    arestas(no.dir, prof + 1, (esq + dir) / 2, dir, acc);
-    acc.push({ px, py: prof, cx: ((esq + dir) / 2 + dir) / 2, cy: prof + 1 });
-  }
+  const valor = no.valor ?? no.chave;
+  acc[valor] = {
+    x: MARGEM + ((esq + dir) / 2) * (larguraDesenho - MARGEM * 2),
+    y: 60 + prof * ESPACO_VERTICAL,
+  };
+  calcPosicoes(no.esq, prof + 1, esq, (esq + dir) / 2, larguraDesenho, acc);
+  calcPosicoes(no.dir, prof + 1, (esq + dir) / 2, dir, larguraDesenho, acc);
   return acc;
 }
 
-function NoAVL({ x, y, valor, bal, destacado, aoPassar, aoSair }) {
-  const bc = bal !== null ? corBal(bal) : '#2a3560';
+// Retorna lista de arestas {pai, filho}
+function calcArestas(no, acc = []) {
+  if (!no) return acc;
+  const pai = no.valor ?? no.chave;
+  if (no.esq) { acc.push({ pai, filho: no.esq.valor ?? no.esq.chave }); calcArestas(no.esq, acc); }
+  if (no.dir) { acc.push({ pai, filho: no.dir.valor ?? no.dir.chave }); calcArestas(no.dir, acc); }
+  return acc;
+}
+
+// Extrai lista plana de nós com balanceamento
+function extrairNos(no, mapa = []) {
+  if (!no) return mapa;
+  const valor = no.valor ?? no.chave;
+  mapa.push({ valor, bal: no.bal ?? 0 });
+  extrairNos(no.esq, mapa);
+  extrairNos(no.dir, mapa);
+  return mapa;
+}
+
+// ─── Nó AVL animado ──────────────────────────────────────────────────────────
+function NoAVL({ valor, bal, posAlvo, estado, destacado, aoPassar, aoSair }) {
+  const ref  = useRef();
+  const bc   = corBal(bal ?? 0);
+  const prevPos = useRef(posAlvo);
+
+  // Primeira montagem: posiciona sem animação
+  useEffect(() => {
+    if (!ref.current) return;
+    if (estado === 'novo') {
+      // Entra com scale 0 na posição alvo
+      ref.current.x(posAlvo.x);
+      ref.current.y(posAlvo.y);
+      ref.current.scaleX(0);
+      ref.current.scaleY(0);
+      ref.current.opacity(0);
+      new Konva.Tween({
+        node: ref.current,
+        duration: DURACAO_ANIM,
+        scaleX: 1,
+        scaleY: 1,
+        opacity: 1,
+        easing: Konva.Easings.EaseOut,
+      }).play();
+    } else {
+      ref.current.x(posAlvo.x);
+      ref.current.y(posAlvo.y);
+    }
+    prevPos.current = posAlvo;
+  }, []); // só na montagem
+
+  // Animação de remoção
+  useEffect(() => {
+    if (!ref.current || estado !== 'removendo') return;
+    new Konva.Tween({
+      node: ref.current,
+      duration: DURACAO_ANIM,
+      scaleX: 0,
+      scaleY: 0,
+      opacity: 0,
+      easing: Konva.Easings.EaseInOut,
+    }).play();
+  }, [estado]);
+
+  // Movimento suave de rotação / rebalanceamento
+  useEffect(() => {
+    if (!ref.current || estado === 'novo' || estado === 'removendo') return;
+    const dx = posAlvo.x - prevPos.current.x;
+    const dy = posAlvo.y - prevPos.current.y;
+    if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) {
+      new Konva.Tween({
+        node: ref.current,
+        duration: DURACAO_ANIM,
+        x: posAlvo.x,
+        y: posAlvo.y,
+        easing: Konva.Easings.EaseInOut,
+      }).play();
+    }
+    prevPos.current = posAlvo;
+  }, [posAlvo.x, posAlvo.y, estado]);
+
   return (
-    <Group x={x} y={y} onMouseEnter={aoPassar} onMouseLeave={aoSair}>
+    <Group ref={ref} onMouseEnter={aoPassar} onMouseLeave={aoSair}>
       {destacado && (
         <Circle radius={RAIO + 5} fill='transparent' stroke='#38bdf8'
           strokeWidth={1.5} opacity={0.4}
@@ -59,7 +128,6 @@ function NoAVL({ x, y, valor, bal, destacado, aoPassar, aoSair }) {
       <Text x={-RAIO} y={-RAIO} width={RAIO * 2} height={RAIO * 2}
         text={String(valor)} fontSize={13} fontFamily='monospace' fontStyle='bold'
         fill={destacado ? '#0284c7' : '#1e293b'} align='center' verticalAlign='middle' />
-      {/* Badge balanceamento */}
       {bal !== null && (
         <>
           <Rect x={RAIO - 4} y={-RAIO - 15} width={20} height={14} cornerRadius={3}
@@ -74,42 +142,98 @@ function NoAVL({ x, y, valor, bal, destacado, aoPassar, aoSair }) {
   );
 }
 
-export default function AVLVisualizer({ onAcoes }) {
-  const [arvore, setArvore]           = useState(null);
-  const [mapaBal, setMapaBal]         = useState({});
-  const [mensagem, setMensagem]       = useState(null);
-  const [valorSobre, setValorSobre]   = useState(null);
-  const refContainer                  = useRef(null);
-  const [largura, setLargura]         = useState(600);
-  const [altura, setAltura]           = useState(500);
+// ─── Aresta animada ──────────────────────────────────────────────────────────
+// Usa refs para atualizar pontos via Konva diretamente, evitando piscar
+function ArestaAVL({ posAlvoPai, posAlvoFilho }) {
+  const ref = useRef();
+  const prevPai   = useRef(posAlvoPai);
+  const prevFilho = useRef(posAlvoFilho);
 
-  const carregar = async () => {
+  useEffect(() => {
+    if (!ref.current) return;
+    ref.current.points([posAlvoPai.x, posAlvoPai.y, posAlvoFilho.x, posAlvoFilho.y]);
+    prevPai.current   = posAlvoPai;
+    prevFilho.current = posAlvoFilho;
+  }, []); // montagem inicial
+
+  useEffect(() => {
+    if (!ref.current) return;
+    const startP = { ...prevPai.current };
+    const startF = { ...prevFilho.current };
+    const endP   = posAlvoPai;
+    const endF   = posAlvoFilho;
+
+    const moved = Math.abs(endP.x - startP.x) > 0.5 || Math.abs(endP.y - startP.y) > 0.5 ||
+                  Math.abs(endF.x - startF.x) > 0.5 || Math.abs(endF.y - startF.y) > 0.5;
+
+    if (!moved) return;
+
+    // Anima incrementalmente via requestAnimationFrame
+    const startTime = performance.now();
+    const dur       = DURACAO_ANIM * 1000;
+
+    const tick = (now) => {
+      const t    = Math.min((now - startTime) / dur, 1);
+      const ease = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t; // easeInOut
+      if (!ref.current) return;
+      ref.current.points([
+        startP.x + (endP.x - startP.x) * ease,
+        startP.y + (endP.y - startP.y) * ease,
+        startF.x + (endF.x - startF.x) * ease,
+        startF.y + (endF.y - startF.y) * ease,
+      ]);
+      ref.current.getLayer()?.batchDraw();
+      if (t < 1) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+
+    prevPai.current   = posAlvoPai;
+    prevFilho.current = posAlvoFilho;
+  }, [posAlvoPai.x, posAlvoPai.y, posAlvoFilho.x, posAlvoFilho.y]);
+
+  return (
+    <Line ref={ref}
+      points={[posAlvoPai.x, posAlvoPai.y, posAlvoFilho.x, posAlvoFilho.y]}
+      stroke='#64748b' strokeWidth={1.5} />
+  );
+}
+
+// ─── Componente principal ────────────────────────────────────────────────────
+export default function AVLVisualizer({ onAcoes }) {
+  const [arvore, setArvore]         = useState(null);
+  // Mapa estável de nós: valor → {valor, bal, posAlvo, estado}
+  const [nosMap, setNosMap]         = useState({});
+  // Lista de arestas: [{pai, filho}]
+  const [arestas, setArestas]       = useState([]);
+  const [mensagem, setMensagem]     = useState(null);
+  const [valorSobre, setValorSobre] = useState(null);
+  const refContainer                = useRef(null);
+  const [largura, setLargura]       = useState(600);
+  const [altura, setAltura]         = useState(500);
+  const animandoRef                 = useRef(false);
+  // Guarda posições calculadas do frame anterior (para arestas animadas)
+  const posAnteriorRef              = useRef({});
+
+  const calcLarguraDesenho = useCallback((arv, larg) => {
+    const prof       = profundidade(arv);
+    const maxNosBase = Math.pow(2, Math.max(0, prof - 1));
+    const minEspaco  = maxNosBase * (RAIO * 3);
+    return Math.max(larg, minEspaco);
+  }, []);
+
+  const carregar = useCallback(async () => {
+    if (animandoRef.current) return;
     try {
       const rA = await visualizarArvore();
       setArvore(rA.data || null);
-      // Extrai balanceamento direto da árvore
-      const mapa = {};
-      const extrairBal = (no) => {
-        if (!no) return;
-        const valor = no.valor || no.chave;
-        mapa[valor] = no.bal !== undefined ? no.bal : 0;
-        extrairBal(no.esq);
-        extrairBal(no.dir);
-      };
-      extrairBal(rA.data);
-      setMapaBal(mapa);
-    } catch { setArvore(null); setMapaBal({}); }
-  };
+    } catch { setArvore(null); }
+  }, []);
 
   useEffect(() => { carregar(); }, []);
-
-  // Recarrega periodicamente
   useEffect(() => {
-    const interval = setInterval(() => {
-      carregar();
-    }, 2000);
-    return () => clearInterval(interval);
-  }, []);
+    const id = setInterval(carregar, 2000);
+    return () => clearInterval(id);
+  }, [carregar]);
 
   useEffect(() => {
     const atualizar = () => {
@@ -123,6 +247,79 @@ export default function AVLVisualizer({ onAcoes }) {
     if (refContainer.current) obs.observe(refContainer.current);
     return () => obs.disconnect();
   }, []);
+
+  // Quando a árvore muda, recalcula posições e detecta inserções/remoções/rotações
+  useEffect(() => {
+    const larguraDesenho = calcLarguraDesenho(arvore, largura);
+    const novasPosicoes  = arvore ? calcPosicoes(arvore, 0, 0, 1, larguraDesenho) : {};
+    const novosNos       = arvore ? extrairNos(arvore) : [];
+    const novasArestas   = arvore ? calcArestas(arvore) : [];
+
+    const novosValores   = new Set(novosNos.map((n) => n.valor));
+    const antigosValores = new Set(Object.keys(nosMap).map(Number));
+
+    const inseridos  = [...novosValores].filter((v) => !antigosValores.has(v));
+    const removidos  = [...antigosValores].filter((v) => !novosValores.has(v));
+
+    // Marca removidos → animação de saída
+    if (removidos.length) {
+      animandoRef.current = true;
+      setNosMap((prev) => {
+        const next = { ...prev };
+        removidos.forEach((v) => {
+          if (next[v]) next[v] = { ...next[v], estado: 'removendo' };
+        });
+        return next;
+      });
+      setTimeout(() => {
+        animandoRef.current = false;
+        // Aplica novo estado limpo
+        const mapaFinal = {};
+        novosNos.forEach((n) => {
+          mapaFinal[n.valor] = {
+            valor: n.valor,
+            bal: n.bal,
+            posAlvo: novasPosicoes[n.valor] || { x: 0, y: 0 },
+            estado: 'normal',
+          };
+        });
+        posAnteriorRef.current = novasPosicoes;
+        setNosMap(mapaFinal);
+        setArestas(novasArestas);
+      }, DURACAO_ANIM * 1000 + 50);
+    } else {
+      // Sem remoções: atualiza posições (animação de movimento / rotação)
+      setNosMap((prev) => {
+        const next = {};
+        novosNos.forEach((n) => {
+          const jaExiste = prev[n.valor];
+          next[n.valor] = {
+            valor: n.valor,
+            bal: n.bal,
+            posAlvo: novasPosicoes[n.valor] || { x: 0, y: 0 },
+            // Se é novo → estado 'novo', senão 'normal'
+            estado: inseridos.includes(n.valor) ? 'novo' : 'normal',
+          };
+        });
+        return next;
+      });
+      posAnteriorRef.current = novasPosicoes;
+      setArestas(novasArestas);
+    }
+
+    // Limpa estado 'novo' após animação
+    if (inseridos.length) {
+      setTimeout(() => {
+        setNosMap((prev) => {
+          const next = { ...prev };
+          inseridos.forEach((v) => {
+            if (next[v]) next[v] = { ...next[v], estado: 'normal' };
+          });
+          return next;
+        });
+      }, DURACAO_ANIM * 1000 + 50);
+    }
+  }, [arvore, largura]);
 
   const avisar = (texto, cor = '#00e676') => {
     setMensagem({ texto, cor });
@@ -146,19 +343,9 @@ export default function AVLVisualizer({ onAcoes }) {
     });
   }, [arvore]);
 
-  const prof     = profundidade(arvore);
-  const nos      = arvore ? posicoes(arvore, 0, 0, 1, mapaBal) : [];
-  const edges    = arvore ? arestas(arvore, 0, 0, 1) : [];
-  const balanceada = nos.every(n => Math.abs(n.bal || 0) <= 1);
-  const maxNosBase = Math.pow(2, Math.max(0, prof - 1));
-  const espacoMinimo = maxNosBase * (RAIO * 3);
-  const larguraDesenho = Math.max(largura, espacoMinimo);
-  const offsetCentralizacao = (larguraDesenho - largura) / 2;
-
-  const toCanvas = (xN, p) => ({
-    x: MARGEM + (xN * (larguraDesenho - MARGEM * 2)) - offsetCentralizacao,
-    y: 60 + p * ESPACO_VERTICAL,
-  });
+  const prof       = profundidade(arvore);
+  const nosLista   = Object.values(nosMap);
+  const balanceada = nosLista.every((n) => Math.abs(n.bal ?? 0) <= 1);
 
   return (
     <div ref={refContainer} className='relative w-full h-full'>
@@ -169,13 +356,10 @@ export default function AVLVisualizer({ onAcoes }) {
         </div>
       )}
 
-      {/* Info + legenda - fixa */}
       <div className='absolute top-3 left-4 flex gap-3 text-[10px] font-mono items-center flex-wrap text-green-600 pointer-events-none z-10 font-semibold'>
         <span>profundidade: <b>{prof}</b></span>
-        <span>nós: <b>{nos.length}</b></span>
-        <span className='font-bold'>
-          {balanceada ? '✓ balanceada' : '⚠ desbalanceada'}
-        </span>
+        <span>nós: <b>{nosLista.filter(n => n.estado !== 'removendo').length}</b></span>
+        <span className='font-bold'>{balanceada ? '✓ balanceada' : '⚠ desbalanceada'}</span>
         <span>● ok</span>
         <span>● alerta</span>
         <span>● erro</span>
@@ -183,23 +367,32 @@ export default function AVLVisualizer({ onAcoes }) {
 
       <PalcoZoom width={largura} height={altura}>
         <Layer>
-          {/* Fundo branco expandido */}
           <Rect x={-5000} y={-5000} width={largura + 10000} height={altura + 10000} fill='#ffffff' />
-          {edges.map((e, i) => {
-            const p = toCanvas(e.px, e.py);
-            const c = toCanvas(e.cx, e.cy);
-            return <Line key={i} points={[p.x, p.y, c.x, c.y]} stroke='#64748b' strokeWidth={1.5} />;
-          })}
-          {nos.map((n, i) => {
-            const pos = toCanvas(n.x, n.prof);
+
+          {/* Arestas animadas — renderizadas antes dos nós */}
+          {arestas.map((e, i) => {
+            const posPai   = nosMap[e.pai]?.posAlvo;
+            const posFilho = nosMap[e.filho]?.posAlvo;
+            if (!posPai || !posFilho) return null;
             return (
-              <NoAVL key={i} x={pos.x} y={pos.y} valor={n.valor} bal={n.bal}
-                destacado={valorSobre === n.valor}
-                aoPassar={() => setValorSobre(n.valor)}
-                aoSair={() => setValorSobre(null)} />
+              <ArestaAVL key={`${e.pai}-${e.filho}`}
+                posAlvoPai={posPai} posAlvoFilho={posFilho} />
             );
           })}
-          {!arvore && (
+
+          {/* Nós animados */}
+          {nosLista.map((n) => (
+            <NoAVL key={n.valor}
+              valor={n.valor}
+              bal={n.bal}
+              posAlvo={n.posAlvo}
+              estado={n.estado}
+              destacado={valorSobre === n.valor}
+              aoPassar={() => setValorSobre(n.valor)}
+              aoSair={() => setValorSobre(null)} />
+          ))}
+
+          {!arvore && nosLista.length === 0 && (
             <Text x={0} y={altura / 2 - 10} width={largura}
               text='Árvore AVL vazia — use o painel para inserir'
               fontSize={12} fontFamily='monospace' fill='#334155' align='center' />

@@ -1,5 +1,6 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { Layer, Rect, Text, Arrow, Group, Line } from 'react-konva';
+import Konva from 'konva';
 import {
   visualizarLista,
   adicionarListaInicio,
@@ -11,42 +12,80 @@ import {
 } from '../../services/listaservices';
 import PalcoZoom from './PalcoZoom';
 
-// ─── Constantes visuais ───────────────────────────────────────────────────────
-const LARGURA_NO  = 90;
-const ALTURA_NO   = 52;
-const ESPACO_NO   = 60;
-const RAIO_BORDA  = 6;
-const INICIO_X    = 40;
-const INICIO_Y    = 80;
+const LARGURA_NO   = 90;
+const ALTURA_NO    = 52;
+const ESPACO_NO    = 60;
+const RAIO_BORDA   = 6;
+const INICIO_X     = 40;
+const INICIO_Y     = 80;
+const DURACAO_ANIM = 0.6;
 
-// ─── Nó da lista ──────────────────────────────────────────────────────────────
-function NoLista({ x, y, valor, indice, destacado, aoPassar, aoSair }) {
+// ─── Nó animado ─────────────────────────────────────────────────────────────
+function NoLista({ x, y, valor, indice, destacado, estado, aoPassar, aoSair }) {
+  const ref = useRef();
+
+  // Inserção: cai de cima com bounce
+  useEffect(() => {
+    if (!ref.current || estado !== 'novo') return;
+    ref.current.y(y - 70);
+    ref.current.opacity(0);
+    ref.current.scaleX(0.5);
+    ref.current.scaleY(0.5);
+    new Konva.Tween({
+      node: ref.current,
+      duration: DURACAO_ANIM,
+      y,
+      opacity: 1,
+      scaleX: 1,
+      scaleY: 1,
+      easing: Konva.Easings.BounceEaseOut,
+    }).play();
+  }, [estado]);
+
+  // Remoção: shrink e fade
+  useEffect(() => {
+    if (!ref.current || estado !== 'removendo') return;
+    new Konva.Tween({
+      node: ref.current,
+      duration: DURACAO_ANIM,
+      scaleX: 0,
+      scaleY: 0,
+      opacity: 0,
+      easing: Konva.Easings.EaseInOut,
+    }).play();
+  }, [estado]);
+
+  // Movimento suave horizontal (posição na lista muda após inserção/remoção)
+  useEffect(() => {
+    if (!ref.current || estado === 'novo' || estado === 'removendo') return;
+    new Konva.Tween({
+      node: ref.current,
+      duration: DURACAO_ANIM * 0.9,
+      x,
+      easing: Konva.Easings.EaseInOut,
+    }).play();
+  }, [x, estado]);
+
   return (
-    <Group x={x} y={y} onMouseEnter={() => aoPassar(indice)} onMouseLeave={aoSair}>
-      {/* sombra de destaque */}
+    <Group ref={ref} x={x} y={y} onMouseEnter={() => aoPassar(indice)} onMouseLeave={aoSair}>
       {destacado && (
         <Rect x={-3} y={-3} width={LARGURA_NO + 6} height={ALTURA_NO + 6}
           cornerRadius={RAIO_BORDA + 2} fill='transparent'
           stroke='#f5c518' strokeWidth={2} opacity={0.5}
           shadowColor='#f5c518' shadowBlur={16} shadowOpacity={0.6} />
       )}
-      {/* corpo */}
       <Rect width={LARGURA_NO} height={ALTURA_NO} cornerRadius={RAIO_BORDA}
         fill={destacado ? '#fef3c7' : '#f1f5f9'}
         stroke={destacado ? '#f59e0b' : '#3b82f6'}
         strokeWidth={destacado ? 2 : 1} />
-      {/* divisor valor | próximo */}
       <Rect x={LARGURA_NO * 0.65} y={6} width={1} height={ALTURA_NO - 12}
         fill={destacado ? '#f59e0b' : '#3b82f6'} opacity={0.7} />
-      {/* valor */}
       <Text x={0} y={0} width={LARGURA_NO * 0.65} height={ALTURA_NO}
         text={String(valor)} fontSize={16} fontFamily='monospace' fontStyle='bold'
         fill={destacado ? '#d97706' : '#1e293b'} align='center' verticalAlign='middle' />
-      {/* seta próximo */}
       <Text x={LARGURA_NO * 0.65} y={0} width={LARGURA_NO * 0.35} height={ALTURA_NO}
         text='→' fontSize={13} fontFamily='monospace'
         fill={destacado ? '#f59e0b' : '#3b82f6'} align='center' verticalAlign='middle' />
-      {/* badge índice */}
       <Rect x={-8} y={-8} width={18} height={18} cornerRadius={9}
         fill={destacado ? '#f59e0b' : '#3b82f6'} />
       <Text x={-8} y={-8} width={18} height={18} text={String(indice)}
@@ -68,31 +107,31 @@ function NoNull({ x, y }) {
   );
 }
 
-// ─── Componente ───────────────────────────────────────────────────────────────
+// ─── Componente principal ────────────────────────────────────────────────────
 export default function ListaVisualizer({ onAcoes }) {
   const [lista, setLista]             = useState([]);
+  const [nosRenderizados, setNosR]    = useState([]);
+  const [nosNovos, setNosNovos]       = useState(new Set());
+  const [nosRemovendo, setNosRemov]   = useState(new Set());
   const [indiceSobre, setIndiceSobre] = useState(null);
   const [mensagem, setMensagem]       = useState(null);
   const refContainer                  = useRef(null);
   const [largura, setLargura]         = useState(600);
   const [altura, setAltura]           = useState(400);
+  const animandoRef                   = useRef(false);
 
-  const carregar = async () => {
+  const carregar = useCallback(async () => {
+    if (animandoRef.current) return;
     try { const r = await visualizarLista(); setLista(r.data || []); }
     catch { setLista([]); }
-  };
-
-  useEffect(() => { carregar(); }, []);
-
-  // Recarrega periodicamente
-  useEffect(() => {
-    const interval = setInterval(() => {
-      carregar();
-    }, 2000);
-    return () => clearInterval(interval);
   }, []);
 
-  // Responsividade
+  useEffect(() => { carregar(); }, []);
+  useEffect(() => {
+    const id = setInterval(carregar, 2000);
+    return () => clearInterval(id);
+  }, [carregar]);
+
   useEffect(() => {
     const atualizar = () => {
       if (refContainer.current) {
@@ -111,7 +150,33 @@ export default function ListaVisualizer({ onAcoes }) {
     setTimeout(() => setMensagem(null), 2500);
   };
 
-  // ── Ações expostas ao painel lateral ──────────────────────────────────────
+  // Diff → animações
+  useEffect(() => {
+    const makeId = (v, i) => `${v}_${i}`;
+    const antigosIds = new Set(nosRenderizados.map((n) => makeId(n.valor, n.indice)));
+    const novosIds   = new Set(lista.map((v, i) => makeId(v, i)));
+
+    const removidos = nosRenderizados.filter((n) => !novosIds.has(makeId(n.valor, n.indice)));
+    const inseridos = lista.map((v, i) => makeId(v, i)).filter((id) => !antigosIds.has(id));
+
+    if (removidos.length) {
+      animandoRef.current = true;
+      setNosRemov(new Set(removidos.map((n) => makeId(n.valor, n.indice))));
+      setTimeout(() => {
+        animandoRef.current = false;
+        setNosR(lista.map((v, i) => ({ valor: v, indice: i })));
+        setNosRemov(new Set());
+      }, DURACAO_ANIM * 1000 + 100);
+    } else {
+      setNosR(lista.map((v, i) => ({ valor: v, indice: i })));
+    }
+
+    if (inseridos.length) {
+      setNosNovos(new Set(inseridos));
+      setTimeout(() => setNosNovos(new Set()), DURACAO_ANIM * 1000 + 100);
+    }
+  }, [lista]);
+
   useEffect(() => {
     onAcoes?.({
       inserir: async (valor, pos) => {
@@ -119,32 +184,21 @@ export default function ListaVisualizer({ onAcoes }) {
         if (isNaN(val)) return avisar('Valor inválido!', '#ff4466');
         try {
           if (pos === 'inicio') {
-            await adicionarListaInicio(val);
-            avisar(`Inserido ${val} no início`);
+            await adicionarListaInicio(val); avisar(`Inserido ${val} no início`);
           } else if (pos === 'meio') {
-            await adicionarListaMeio(val);
-            avisar(`Inserido ${val} no meio`);
+            await adicionarListaMeio(val); avisar(`Inserido ${val} no meio`);
           } else if (pos === 'fim') {
-            await adicionarListaFim(val);
-            avisar(`Inserido ${val} no fim`);
+            await adicionarListaFim(val); avisar(`Inserido ${val} no fim`);
           } else if (pos === '' || pos === undefined || pos === null) {
-            await adicionarListaOrdenado(val);
-            avisar(`Inserido ${val} (ordenado)`);
+            await adicionarListaOrdenado(val); avisar(`Inserido ${val} (ordenado)`);
           } else {
             const p = parseInt(pos);
             if (isNaN(p) || p < 0 || p > lista.length)
               return avisar(`Posição inválida (0–${lista.length})`, '#ff4466');
             const posicaoMeio = Math.floor(lista.length / 2);
-            if (p === 0) {
-              await adicionarListaInicio(val);
-              avisar(`Inserido ${val} no início`);
-            } else if (p === lista.length) {
-              await adicionarListaFim(val);
-              avisar(`Inserido ${val} no fim`);
-            } else if (p === posicaoMeio) {
-              await adicionarListaMeio(val);
-              avisar(`Inserido ${val} no meio`);
-            }
+            if (p === 0) { await adicionarListaInicio(val); avisar(`Inserido ${val} no início`); }
+            else if (p === lista.length) { await adicionarListaFim(val); avisar(`Inserido ${val} no fim`); }
+            else if (p === posicaoMeio) { await adicionarListaMeio(val); avisar(`Inserido ${val} no meio`); }
           }
           setTimeout(() => carregar(), 300);
         } catch { avisar('Erro ao inserir!', '#ff4466'); }
@@ -152,9 +206,8 @@ export default function ListaVisualizer({ onAcoes }) {
       remover: async (valor) => {
         const val = parseInt(valor);
         if (!isNaN(val)) {
-          // tenta remover por valor (ordenado)
           try { await removerListaOrdenado(val); setTimeout(() => carregar(), 300); avisar(`Removido ${val}`); return; }
-          catch { /* fallback: tenta por posição */ }
+          catch { /* fallback */ }
         }
         const pos = parseInt(valor);
         if (isNaN(pos) || pos < 0 || pos >= lista.length)
@@ -165,12 +218,11 @@ export default function ListaVisualizer({ onAcoes }) {
     });
   }, [lista]);
 
-  const larguraTotal  = lista.length * (LARGURA_NO + ESPACO_NO) + 48 + INICIO_X * 2;
-  const larguraCena   = Math.max(largura, larguraTotal);
+  const larguraTotal = nosRenderizados.length * (LARGURA_NO + ESPACO_NO) + 48 + INICIO_X * 2;
+  const larguraCena  = Math.max(largura, larguraTotal);
 
   return (
     <div ref={refContainer} className='relative w-full h-full'>
-      {/* Mensagem flutuante */}
       {mensagem && (
         <div style={{ borderColor: mensagem.cor, color: mensagem.cor }}
           className='absolute top-3 left-1/2 -translate-x-1/2 z-10 border rounded-lg px-4 py-1 text-xs font-mono font-bold bg-black/70 backdrop-blur-sm pointer-events-none'>
@@ -178,7 +230,6 @@ export default function ListaVisualizer({ onAcoes }) {
         </div>
       )}
 
-      {/* Info - fixa */}
       <div className='absolute top-3 left-4 flex gap-3 text-[10px] font-mono text-green-600 pointer-events-none z-10 font-semibold'>
         <span className='font-bold'>CIRCULAR</span>
         <span>tamanho: <b>{lista.length}</b></span>
@@ -189,26 +240,30 @@ export default function ListaVisualizer({ onAcoes }) {
       <div style={{ width: '100%', height: '100%', backgroundColor: '#ffffff', overflow: 'hidden' }}>
         <PalcoZoom width={larguraCena} height={altura || 400}>
           <Layer>
-            {/* Fundo branco expandido */}
             <Rect x={-5000} y={-5000} width={larguraCena + 10000} height={(altura || 400) + 10000} fill='#ffffff' />
-            {/* Label CABEÇA */}
+
             <Text x={INICIO_X} y={INICIO_Y - 32} text='CABEÇA' fontSize={9}
               fontFamily='monospace' fontStyle='bold' fill='#f5c518' letterSpacing={2} />
             <Rect x={INICIO_X} y={INICIO_Y - 20} width={2} height={12} fill='#f5c518' opacity={0.5} />
 
-            {/* Nós */}
-            {lista.map((val, i) => (
-              <NoLista key={i}
-                x={INICIO_X + i * (LARGURA_NO + ESPACO_NO)} y={INICIO_Y}
-                valor={val} indice={i}
-                destacado={indiceSobre === i}
-                aoPassar={setIndiceSobre}
-                aoSair={() => setIndiceSobre(null)} />
-            ))}
+            {nosRenderizados.map((n) => {
+              const id     = `${n.valor}_${n.indice}`;
+              const xPos   = INICIO_X + n.indice * (LARGURA_NO + ESPACO_NO);
+              const estado = nosNovos.has(id) ? 'novo' : nosRemovendo.has(id) ? 'removendo' : 'normal';
+              return (
+                <NoLista key={id}
+                  x={xPos} y={INICIO_Y}
+                  valor={n.valor} indice={n.indice}
+                  destacado={indiceSobre === n.indice}
+                  estado={estado}
+                  aoPassar={setIndiceSobre}
+                  aoSair={() => setIndiceSobre(null)} />
+              );
+            })}
 
             {/* Setas entre nós */}
-            {lista.map((_, i) => {
-              if (i >= lista.length - 1) return null;
+            {nosRenderizados.map((_, i) => {
+              if (i >= nosRenderizados.length - 1) return null;
               const x1 = INICIO_X + i * (LARGURA_NO + ESPACO_NO) + LARGURA_NO;
               const x2 = INICIO_X + (i + 1) * (LARGURA_NO + ESPACO_NO);
               const y  = INICIO_Y + ALTURA_NO / 2;
@@ -220,53 +275,31 @@ export default function ListaVisualizer({ onAcoes }) {
               );
             })}
 
-            {/* Seta do último para o primeiro (lista circular) */}
-            {lista.length > 1 && (() => {
-              const ultimoX = INICIO_X + (lista.length - 1) * (LARGURA_NO + ESPACO_NO) + LARGURA_NO;
-              const ultimoY = INICIO_Y + ALTURA_NO / 2;
+            {/* Seta circular (último → primeiro) */}
+            {nosRenderizados.length > 1 && (() => {
+              const ultimoX  = INICIO_X + (nosRenderizados.length - 1) * (LARGURA_NO + ESPACO_NO) + LARGURA_NO;
+              const ultimoY  = INICIO_Y + ALTURA_NO / 2;
               const primeiroX = INICIO_X;
               const primeiroY = INICIO_Y + ALTURA_NO / 2;
-              const alturaArco = 60;
-              
-              // Curva de Bézier para a seta circular
-              const pontoControle1X = ultimoX + 40;
-              const pontoControle1Y = ultimoY - alturaArco;
-              const pontoControle2X = primeiroX - 40;
-              const pontoControle2Y = primeiroY - alturaArco;
-              
               return (
                 <>
-                  {/* Linha curva */}
                   <Line
                     points={[
                       ultimoX + 4, ultimoY,
-                      pontoControle1X, pontoControle1Y,
-                      pontoControle2X, pontoControle2Y,
-                      primeiroX - 4, primeiroY
+                      ultimoX + 40, ultimoY - 60,
+                      primeiroX - 40, primeiroY - 60,
+                      primeiroX - 4, primeiroY,
                     ]}
-                    stroke='#10b981'
-                    strokeWidth={2}
-                    tension={0.5}
-                    bezier
-                  />
-                  {/* Seta no final */}
+                    stroke='#10b981' strokeWidth={2} tension={0.5} bezier />
                   <Arrow
-                    points={[
-                      primeiroX - 12, primeiroY - 8,
-                      primeiroX - 4, primeiroY
-                    ]}
-                    stroke='#10b981'
-                    strokeWidth={2}
-                    fill='#10b981'
-                    pointerLength={7}
-                    pointerWidth={5}
-                  />
+                    points={[primeiroX - 12, primeiroY - 8, primeiroX - 4, primeiroY]}
+                    stroke='#10b981' strokeWidth={2} fill='#10b981'
+                    pointerLength={7} pointerWidth={5} />
                 </>
               );
             })()}
 
-            {/* Estado vazio */}
-            {lista.length === 0 && (
+            {lista.length === 0 && nosRenderizados.length === 0 && (
               <Text x={0} y={(altura || 400) / 2 - 10} width={larguraCena}
                 text='Lista vazia — use o painel para inserir'
                 fontSize={12} fontFamily='monospace' fill='#334155' align='center' />
