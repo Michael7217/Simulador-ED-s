@@ -11,7 +11,6 @@ const INICIO_X     = 50;
 const INICIO_Y     = 90;
 const DURACAO_ANIM = 0.55;
 
-// ─── Nó da fila — só anima quando é novo ou está sendo removido ────────────
 function NoFila({ x, y, valor, indice, ehFrente, ehFundo, estado }) {
   const ref      = useRef();
   const especial = ehFrente || ehFundo;
