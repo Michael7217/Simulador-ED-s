@@ -4,61 +4,46 @@ import Konva from 'konva';
 import { visualizarPilha, inserirPilha, removerPilha } from '../../services/pilhaServices';
 import PalcoZoom from './PalcoZoom';
 
-const LARGURA_NO        = 150;
-const ALTURA_NO         = 48;
-const ESPACO_NO         = 5;
-const DURACAO_ANIM      = 0.55; // segundos — mais lenta para o usuário acompanhar
+const LARGURA_NO   = 150;
+const ALTURA_NO    = 48;
+const ESPACO_NO    = 5;
+const DURACAO_ANIM = 0.55;
 
-// ─── Nó animado ─────────────────────────────────────────────────────────────
+// ─── Nó da pilha — só anima quando é novo ou está sendo removido ──────────
 function NoPilha({ x, y, valor, indice, ehTopo, estado }) {
   const ref = useRef();
 
-  // Animação de entrada (empilhar): cai de cima
+  // Animação de entrada: cai de cima
   useEffect(() => {
-    if (!ref.current) return;
-    if (estado === 'novo') {
-      ref.current.opacity(0);
-      ref.current.y(y - 60);
-      ref.current.scaleX(0.7);
-      ref.current.scaleY(0.7);
-      new Konva.Tween({
-        node: ref.current,
-        duration: DURACAO_ANIM,
-        opacity: 1,
-        y,
-        scaleX: 1,
-        scaleY: 1,
-        easing: Konva.Easings.EaseOut,
-      }).play();
-    }
-  }, [estado]);
-
-  // Animação de saída (desempilhar): sobe e some
-  useEffect(() => {
-    if (!ref.current) return;
-    if (estado === 'removendo') {
-      new Konva.Tween({
-        node: ref.current,
-        duration: DURACAO_ANIM,
-        opacity: 0,
-        y: y - 70,
-        scaleX: 0.6,
-        scaleY: 0.6,
-        easing: Konva.Easings.EaseIn,
-      }).play();
-    }
-  }, [estado]);
-
-  // Movimento suave ao mudar de posição (ex: reordenação)
-  useEffect(() => {
-    if (!ref.current || estado === 'novo' || estado === 'removendo') return;
+    if (!ref.current || estado !== 'novo') return;
+    ref.current.y(y - 64);
+    ref.current.opacity(0);
+    ref.current.scaleX(0.7);
+    ref.current.scaleY(0.7);
     new Konva.Tween({
       node: ref.current,
-      duration: DURACAO_ANIM * 0.8,
+      duration: DURACAO_ANIM,
+      opacity: 1,
       y,
-      easing: Konva.Easings.EaseInOut,
+      scaleX: 1,
+      scaleY: 1,
+      easing: Konva.Easings.EaseOut,
     }).play();
-  }, [y, estado]);
+  }, [estado, y]);
+
+  // Animação de saída: sobe e some
+  useEffect(() => {
+    if (!ref.current || estado !== 'removendo') return;
+    new Konva.Tween({
+      node: ref.current,
+      duration: DURACAO_ANIM,
+      opacity: 0,
+      y: y - 72,
+      scaleX: 0.6,
+      scaleY: 0.6,
+      easing: Konva.Easings.EaseIn,
+    }).play();
+  }, [estado, y]);
 
   return (
     <Group ref={ref} x={x} y={y}>
@@ -84,18 +69,16 @@ function NoPilha({ x, y, valor, indice, ehTopo, estado }) {
   );
 }
 
-// ─── Componente principal ────────────────────────────────────────────────────
 export default function PilhaVisualizer({ onAcoes }) {
-  const [pilha, setPilha]               = useState([]);
-  const [nosRenderizados, setNosRend]   = useState([]);
-  const [nosNovos, setNosNovos]         = useState(new Set());
-  const [nosRemovendo, setNosRemov]     = useState(new Set());
-  const [mensagem, setMensagem]         = useState(null);
-  const refContainer                    = useRef(null);
-  const [largura, setLargura]           = useState(400);
-  const [altura, setAltura]             = useState(500);
-  // Evita recarregar durante animação de remoção
-  const animandoRef                     = useRef(false);
+  const [pilha, setPilha]             = useState([]);
+  const [nosRenderizados, setNosRend] = useState([]);
+  const [novoValorTopo, setNovoValor] = useState(null);
+  const [removendoTopo, setRemovendo] = useState(null);
+  const [mensagem, setMensagem]       = useState(null);
+  const refContainer                  = useRef(null);
+  const [largura, setLargura]         = useState(400);
+  const [altura, setAltura]           = useState(500);
+  const animandoRef                   = useRef(false);
 
   const carregar = useCallback(async () => {
     if (animandoRef.current) return;
@@ -104,13 +87,11 @@ export default function PilhaVisualizer({ onAcoes }) {
   }, []);
 
   useEffect(() => { carregar(); }, []);
-
   useEffect(() => {
     const id = setInterval(carregar, 2000);
     return () => clearInterval(id);
   }, [carregar]);
 
-  // Responsividade
   useEffect(() => {
     const atualizar = () => {
       if (refContainer.current) {
@@ -124,35 +105,29 @@ export default function PilhaVisualizer({ onAcoes }) {
     return () => obs.disconnect();
   }, []);
 
-  // Diff de nós → animar inserção/remoção
+  // Detecta mudanças: compara valores (não índices)
   useEffect(() => {
-    const novosIds   = new Set(pilha.map((_, i) => `${pilha[i]}_${i}`));
-    const antigosIds = new Set(nosRenderizados.map((n) => `${n.valor}_${n.indice}`));
+    const novosValores = new Set(pilha);
+    const antigosValores = new Set(nosRenderizados.map(n => n.valor));
 
-    // Valores que saíram (topo — índice 0)
-    const removidos = nosRenderizados.filter(
-      (n) => !pilha.some((v, i) => `${v}_${i}` === `${n.valor}_${n.indice}`)
-    );
-    // Valores que entraram
-    const inseridos = pilha
-      .map((v, i) => `${v}_${i}`)
-      .filter((id) => !antigosIds.has(id));
+    const inseridos = pilha.filter((v, i) => i === 0 && !antigosValores.has(v));
+    const removidos = nosRenderizados.filter((n) => n.indice === 0 && !novosValores.has(n.valor));
 
-    if (removidos.length) {
+    if (inseridos.length > 0) {
+      setNovoValor(inseridos[0]);
+      setTimeout(() => setNovoValor(null), DURACAO_ANIM * 1000 + 100);
+    }
+
+    if (removidos.length > 0) {
       animandoRef.current = true;
-      setNosRemov(new Set(removidos.map((n) => `${n.valor}_${n.indice}`)));
+      setRemovendo(removidos[0].valor);
       setTimeout(() => {
         animandoRef.current = false;
         setNosRend(pilha.map((v, i) => ({ valor: v, indice: i })));
-        setNosRemov(new Set());
+        setRemovendo(null);
       }, DURACAO_ANIM * 1000 + 100);
     } else {
       setNosRend(pilha.map((v, i) => ({ valor: v, indice: i })));
-    }
-
-    if (inseridos.length) {
-      setNosNovos(new Set(inseridos));
-      setTimeout(() => setNosNovos(new Set()), DURACAO_ANIM * 1000 + 100);
     }
   }, [pilha]);
 
@@ -180,6 +155,8 @@ export default function PilhaVisualizer({ onAcoes }) {
   const xNo   = (largura - LARGURA_NO) / 2;
   const baseY = altura - 60;
 
+  // y = baseY - (tamanho - índice) * (altura + espaço)
+  // índice 0 fica no topo (y mais alto)
   const topoY = nosRenderizados.length > 0
     ? baseY - nosRenderizados.length * (ALTURA_NO + ESPACO_NO)
     : null;
@@ -216,17 +193,18 @@ export default function PilhaVisualizer({ onAcoes }) {
               fontSize={12} fontFamily='monospace' fill='#334155' align='center' />
           )}
 
-          {nosRenderizados.map((n) => {
-            const id     = `${n.valor}_${n.indice}`;
-            const i      = n.indice;
-            const y      = baseY - (nosRenderizados.length - i) * (ALTURA_NO + ESPACO_NO);
-            const ehTopo = i === 0;
-            let estado   = 'normal';
-            if (nosNovos.has(id))     estado = 'novo';
-            if (nosRemovendo.has(id))  estado = 'removendo';
+          {nosRenderizados.map((n, idx) => {
+            const y      = baseY - (nosRenderizados.length - idx) * (ALTURA_NO + ESPACO_NO);
+            const ehTopo = idx === 0;
+            // Só anima o nó do topo se for novo ou está sendo removido
+            let estado = 'normal';
+            if (ehTopo && n.valor === novoValorTopo)     estado = 'novo';
+            if (ehTopo && n.valor === removendoTopo)     estado = 'removendo';
             return (
-              <NoPilha key={id} x={xNo} y={y}
-                valor={n.valor} indice={i}
+              <NoPilha
+                key={`${n.valor}_${idx}`}
+                x={xNo} y={y}
+                valor={n.valor} indice={idx}
                 ehTopo={ehTopo} estado={estado} />
             );
           })}

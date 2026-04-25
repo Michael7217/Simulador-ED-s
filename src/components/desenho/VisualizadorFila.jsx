@@ -11,9 +11,9 @@ const INICIO_X     = 50;
 const INICIO_Y     = 90;
 const DURACAO_ANIM = 0.55;
 
-// ─── Nó animado ─────────────────────────────────────────────────────────────
+// ─── Nó da fila — só anima quando é novo ou está sendo removido ────────────
 function NoFila({ x, y, valor, indice, ehFrente, ehFundo, estado }) {
-  const ref    = useRef();
+  const ref      = useRef();
   const especial = ehFrente || ehFundo;
   const cor      = ehFrente ? '#34d399' : ehFundo ? '#38bdf8' : null;
 
@@ -33,7 +33,7 @@ function NoFila({ x, y, valor, indice, ehFrente, ehFundo, estado }) {
       scaleY: 1,
       easing: Konva.Easings.EaseOut,
     }).play();
-  }, [estado]);
+  }, [estado, x]);
 
   // Remoção: sai pela esquerda
   useEffect(() => {
@@ -47,18 +47,7 @@ function NoFila({ x, y, valor, indice, ehFrente, ehFundo, estado }) {
       scaleY: 0.6,
       easing: Konva.Easings.EaseIn,
     }).play();
-  }, [estado]);
-
-  // Movimento suave de posição (fila avança após remoção)
-  useEffect(() => {
-    if (!ref.current || estado === 'novo' || estado === 'removendo') return;
-    new Konva.Tween({
-      node: ref.current,
-      duration: DURACAO_ANIM * 0.9,
-      x,
-      easing: Konva.Easings.EaseInOut,
-    }).play();
-  }, [x, estado]);
+  }, [estado, x]);
 
   return (
     <Group ref={ref} x={x} y={y}>
@@ -81,17 +70,16 @@ function NoFila({ x, y, valor, indice, ehFrente, ehFundo, estado }) {
   );
 }
 
-// ─── Componente principal ────────────────────────────────────────────────────
 export default function FilaVisualizer({ onAcoes }) {
-  const [fila, setFila]             = useState([]);
-  const [nosRenderizados, setNosR]  = useState([]);
-  const [nosNovos, setNosNovos]     = useState(new Set());
-  const [nosRemovendo, setNosRemov] = useState(new Set());
-  const [mensagem, setMensagem]     = useState(null);
-  const refContainer                = useRef(null);
-  const [largura, setLargura]       = useState(600);
-  const [altura, setAltura]         = useState(300);
-  const animandoRef                 = useRef(false);
+  const [fila, setFila]               = useState([]);
+  const [nosRenderizados, setNosRend] = useState([]);
+  const [novoValorFundo, setNovoVal]  = useState(null);
+  const [removendoFrente, setRemov]   = useState(null);
+  const [mensagem, setMensagem]       = useState(null);
+  const refContainer                  = useRef(null);
+  const [largura, setLargura]         = useState(600);
+  const [altura, setAltura]           = useState(300);
+  const animandoRef                   = useRef(false);
 
   const carregar = useCallback(async () => {
     if (animandoRef.current) return;
@@ -123,30 +111,31 @@ export default function FilaVisualizer({ onAcoes }) {
     setTimeout(() => setMensagem(null), 2500);
   };
 
-  // Diff de nós para animações
+  // Detecta mudanças: novo no fundo ou removido da frente
   useEffect(() => {
-    const makeId = (v, i) => `${v}_${i}`;
-    const novosIds   = new Set(fila.map((v, i) => makeId(v, i)));
-    const antigosIds = new Set(nosRenderizados.map((n) => makeId(n.valor, n.indice)));
+    const novosValores = new Set(fila);
+    const antigosValores = new Set(nosRenderizados.map(n => n.valor));
 
-    const removidos = nosRenderizados.filter((n) => !novosIds.has(makeId(n.valor, n.indice)));
-    const inseridos = fila.map((v, i) => makeId(v, i)).filter((id) => !antigosIds.has(id));
+    // Novo (adicionado ao fundo = último da fila atual)
+    const inseridos = fila.filter((v, i) => i === fila.length - 1 && !antigosValores.has(v));
+    // Removido (estava na frente = primeiro da lista anterior)
+    const removidos = nosRenderizados.filter((n) => n.indice === 0 && !novosValores.has(n.valor));
 
-    if (removidos.length) {
-      animandoRef.current = true;
-      setNosRemov(new Set(removidos.map((n) => makeId(n.valor, n.indice))));
-      setTimeout(() => {
-        animandoRef.current = false;
-        setNosR(fila.map((v, i) => ({ valor: v, indice: i })));
-        setNosRemov(new Set());
-      }, DURACAO_ANIM * 1000 + 100);
-    } else {
-      setNosR(fila.map((v, i) => ({ valor: v, indice: i })));
+    if (inseridos.length > 0) {
+      setNovoVal(inseridos[0]);
+      setTimeout(() => setNovoVal(null), DURACAO_ANIM * 1000 + 100);
     }
 
-    if (inseridos.length) {
-      setNosNovos(new Set(inseridos));
-      setTimeout(() => setNosNovos(new Set()), DURACAO_ANIM * 1000 + 100);
+    if (removidos.length > 0) {
+      animandoRef.current = true;
+      setRemov(removidos[0].valor);
+      setTimeout(() => {
+        animandoRef.current = false;
+        setNosRend(fila.map((v, i) => ({ valor: v, indice: i })));
+        setRemov(null);
+      }, DURACAO_ANIM * 1000 + 100);
+    } else {
+      setNosRend(fila.map((v, i) => ({ valor: v, indice: i })));
     }
   }, [fila]);
 
@@ -165,13 +154,6 @@ export default function FilaVisualizer({ onAcoes }) {
       },
     });
   }, [fila]);
-
-  // Renderiza o estado transitório (inclui nós removendo + novos estado)
-  const todosOsNos = [
-    ...nosRenderizados,
-    // Nós que estão sendo removidos e ainda não estão em nosRenderizados
-    ...nosRenderizados.filter((n) => nosRemovendo.has(`${n.valor}_${n.indice}`)),
-  ];
 
   const larguraTotal = nosRenderizados.length * (LARGURA_NO + ESPACO_NO) + 80 + INICIO_X;
   const larguraCena  = Math.max(largura, larguraTotal);
@@ -195,22 +177,27 @@ export default function FilaVisualizer({ onAcoes }) {
           <Layer>
             <Rect x={-5000} y={-5000} width={larguraCena + 10000} height={(altura || 300) + 10000} fill='#ffffff' />
 
-            {nosRenderizados.length === 0 && nosRemovendo.size === 0 && (
+            {nosRenderizados.length === 0 && (
               <Text x={0} y={(altura || 300) / 2 - 10} width={larguraCena}
                 text='Fila vazia — use o painel para inserir'
                 fontSize={12} fontFamily='monospace' fill='#334155' align='center' />
             )}
 
-            {nosRenderizados.map((n) => {
-              const id      = `${n.valor}_${n.indice}`;
-              const xPos    = INICIO_X + n.indice * (LARGURA_NO + ESPACO_NO);
-              const estado  = nosNovos.has(id) ? 'novo' : nosRemovendo.has(id) ? 'removendo' : 'normal';
+            {nosRenderizados.map((n, idx) => {
+              const xPos    = INICIO_X + idx * (LARGURA_NO + ESPACO_NO);
+              const ehFrente = idx === 0;
+              const ehFundo  = idx === nosRenderizados.length - 1 && nosRenderizados.length > 1;
+              // Só anima: novo no fundo OU removido da frente
+              let estado = 'normal';
+              if (ehFundo && n.valor === novoValorFundo)      estado = 'novo';
+              if (ehFrente && n.valor === removendoFrente)    estado = 'removendo';
               return (
-                <NoFila key={id}
+                <NoFila
+                  key={`${n.valor}_${idx}`}
                   x={xPos} y={INICIO_Y}
-                  valor={n.valor} indice={n.indice}
-                  ehFrente={n.indice === 0}
-                  ehFundo={n.indice === nosRenderizados.length - 1 && nosRenderizados.length > 1}
+                  valor={n.valor} indice={idx}
+                  ehFrente={ehFrente}
+                  ehFundo={ehFundo}
                   estado={estado} />
               );
             })}
