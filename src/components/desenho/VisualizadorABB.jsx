@@ -1,3 +1,5 @@
+// VisualizadorABB.jsx - Versão corrigida
+
 import { useState, useRef, useEffect } from "react";
 import { Layer, Circle, Text, Line, Group, Rect } from "react-konva";
 import Konva from "konva";
@@ -186,6 +188,9 @@ export default function ABBVisualizer() {
     y: 55 + p * ESPACO_VERTICAL,
   });
 
+  // Verifica se a árvore está vazia
+  const estaVazia = !arvore && nosRenderizados.length === 0;
+
   return (
     <div ref={refContainer} className="relative w-full h-full">
       <PalcoZoom width={largura} height={altura}>
@@ -226,6 +231,20 @@ export default function ABBVisualizer() {
               />
             );
           })}
+
+          {/* Mensagem centralizada quando a árvore estiver vazia - mesmo estilo da RN */}
+          {estaVazia && (
+            <Text 
+              x={0} 
+              y={altura / 2 - 10} 
+              width={largura}
+              text="Árvore Binária vazia — use o painel para inserir"
+              fontSize={12} 
+              fontFamily="monospace" 
+              fill="#334155" 
+              align="center" 
+            />
+          )}
         </Layer>
       </PalcoZoom>
     </div>

@@ -600,7 +600,7 @@ export default function ListaVisualizer({ onAcoes }) {
                 x={0}
                 y={(altura || 400) / 2 - 10}
                 width={larguraCena}
-                text='Lista vazia — use o painel para inserir'
+                text='Lista Encadeada vazia — use o painel para inserir'
                 fontSize={12}
                 fontFamily='monospace'
                 fill='#334155'

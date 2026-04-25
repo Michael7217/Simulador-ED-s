@@ -21,7 +21,7 @@ export default function Button(props){
             <button
                 type='button'
                 onClick={toggleModal}
-                className='border-2 rounded-2xl flex justify-center items-center text-xl font-medium text-amarelo p-2 bg-[rgba(0,0,0,0.2)] cursor-pointer'
+                className='border-2 rounded-2xl flex justify-center items-center text-xl font-medium text-amarelo p-2 bg-[rgba(0,0,0,0.2)] cursor-pointer hover:bg-amarelo/20 transition-colors'
             >
                 {props.children}
             </button>

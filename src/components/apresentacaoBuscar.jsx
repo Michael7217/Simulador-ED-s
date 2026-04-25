@@ -1,11 +1,38 @@
-import React from 'react'
-
+import React, { useEffect, useRef } from 'react'
 
 export default function ApresentacaoBuscar(props){
     const handleClose = () => props.funcao?.(false);
+    const botaoFecharRef = useRef(null);
     
     const resultado = props.resultado;
     const encontrado = resultado && resultado?.encontrado !== false && resultado?.valor !== undefined;
+    
+    
+    useEffect(() => {
+        if (props.estado && botaoFecharRef.current) {
+            
+            setTimeout(() => {
+                botaoFecharRef.current?.focus();
+            }, 100);
+        }
+    }, [props.estado]);
+    
+    useEffect(() => {
+        const handleKeyDown = (event) => {
+            if (props.estado && event.key === 'Enter') {
+                event.preventDefault();
+                handleClose();
+            }
+        };
+        
+        if (props.estado) {
+            document.addEventListener('keydown', handleKeyDown);
+        }
+        
+        return () => {
+            document.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [props.estado]);
     
     return(
         <>
@@ -96,8 +123,10 @@ export default function ApresentacaoBuscar(props){
             </div>
             
             <button 
+                ref={botaoFecharRef}
                 onClick={handleClose}
-                className='border-4 rounded-2xl w-full py-2 text-xl text-amarelo border-amarelo bg-[rgba(0,0,0,0.2)] cursor-pointer font-medium mt-4 hover:bg-amarelo/20 transition-colors'
+                className='border-4 rounded-2xl w-full py-2 text-xl text-amarelo border-amarelo bg-[rgba(0,0,0,0.2)] cursor-pointer font-medium mt-4 hover:bg-amarelo/20 transition-colors focus:outline-none focus:ring-2 focus:ring-amarelo focus:ring-offset-2 focus:ring-offset-azul'
+                tabIndex={0}
             >
                 Fechar
             </button>
