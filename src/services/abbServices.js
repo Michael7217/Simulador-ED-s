@@ -1,6 +1,7 @@
 import Api from './api';
 import { SessionId } from '../utils/sessionId';
 
+
 export const  inserirAbb = (valor) => {
     return Api.post((`/api/abb/inserir/${valor}`));
 }
